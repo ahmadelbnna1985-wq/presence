@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حضور وانصراف - شمال القاهره</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            max-width: 420px;
+            width: 100%;
+            padding: 22px 18px;
+            border-radius: 30px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.13);
+            text-align: center;
+        }
+        h1 {
+            color: #1a2b4c;
+            font-size: 22px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .profile-section {
+            margin: 10px 0 14px 0;
+            position: relative;
+        }
+        .profile-image-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 8px auto;
+            cursor: pointer;
+        }
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #3498db;
+            box-shadow: 0 4px 15px rgba(52,152,219,0.3);
+            transition: all 0.3s ease;
+            background: #e8f4fd;
+        }
+        .profile-image:hover {
+            transform: scale(1.03);
+            border-color: #2471a3;
+        }
+        .camera-overlay {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            background: #3498db;
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .camera-overlay:hover {
+            background: #2471a3;
+            transform: scale(1.08);
+        }
+        .profile-name-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .profile-name {
+            font-size: 19px;
+            font-weight: bold;
+            color: #1a2b4c;
+            padding: 4px 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .profile-name:hover {
+            background: #e8f4fd;
+        }
+        .edit-icon {
+            font-size: 14px;
+            color: #3498db;
+            margin-right: 4px;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        .profile-name:hover .edit-icon {
+            opacity: 1;
+        }
+        .location-box {
+            width: 100%;
+            padding: 13px 16px;
+            border: none;
+            border-radius: 50px;
+            font-size: 17px;
+            font-weight: bold;
+            color: white;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #3498db;
+            text-align: center;
+        }
+        .location-box .status {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .location-box:active {
+            background: #2471a3;
+        }
+        button {
+            width: 100%;
+            padding: 13px 16px;
+            border: none;
+            border-radius: 50px;
+            font-size: 17px;
+            font-weight: bold;
+            color: white;
+            margin: 6px 0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-attend {
+            background: #27ae60;
+        }
+        .btn-attend:active {
+            background: #1e8449;
+        }
+        .btn-leave {
+            background: #e67e22;
+        }
+        .btn-leave:active {
+            background: #ca6f1e;
+        }
+        .disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(0.8);
+        }
+        #statusMessage {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #2c3e50;
+            border-right: 4px solid #3498db;
+            text-align: right;
+            min-height: 44px;
+            line-height: 1.6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 28px 22px;
+            border-radius: 20px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-content h3 {
+            margin-bottom: 14px;
+            color: #1a2b4c;
+            font-size: 19px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .modal-content input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 0;
+        }
+        .modal-save {
+            background: #27ae60;
+            color: white;
+        }
+        .modal-save:hover {
+            background: #1e8449;
+        }
+        .modal-cancel {
+            background: #e74c3c;
+            color: white;
+        }
+        .modal-cancel:hover {
+            background: #c0392b;
+        }
+        .note {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📍 الحضور والانصراف</h1>
+
+    <div class="profile-section">
+        <div class="profile-image-container" onclick="changePhoto()">
+            <img id="profileImage" class="profile-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e8f4fd'/%3E%3Ctext x='50' y='58' font-size='44' text-anchor='middle' fill='%233498db'%3E👤%3C/text%3E%3C/svg%3E" alt="صورة الموظف">
+            <div class="camera-overlay">📷</div>
+        </div>
+        
+        <div class="profile-name-container" onclick="editName()">
+            <span class="profile-name" id="userNameDisplay">غير مسجل</span>
+            <span class="edit-icon">✏️</span>
+        </div>
+    </div>
+
+    <div class="location-box" id="locationBox" onclick="getLocation()">
+        <div class="status" id="locationStatus">🗺️ جاري تحميل الموقع...</div>
+    </div>
+
+    <button class="btn-attend disabled" onclick="sendAttendance('حضور')" id="attendBtn">✅ تسجيل الحضور</button>
+    <button class="btn-leave disabled" onclick="sendAttendance('انصراف')" id="leaveBtn">🚪 تسجيل الانصراف</button>
+
+    <div id="statusMessage">
+        ⏳ انتظر... جاري تجهيز البيانات
+    </div>
+    <div class="note">📍 الأزرار تعمل فقط عند تطابق الموقع مع أحد فروع الشركة</div>
+</div>
+
+<!-- مودال تغيير الاسم -->
+<div class="modal" id="nameModal">
+    <div class="modal-content">
+        <h3>✏️ تغيير الاسم</h3>
+        <input type="text" id="nameInput" placeholder="ادخل اسمك الكامل">
+        <div class="modal-buttons">
+            <button class="modal-save" onclick="saveName()">حفظ</button>
+            <button class="modal-cancel" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    // ============================================================
+    // 🔐 مفاتيح التشفير - مخفية باستخدام Base64
+    // ============================================================
+    
+    // المفتاح الأساسي مشفر بـ Base64
+    const _k1 = "TjBydGhDQGlyMCMyMDI2";
+    
+    // IV مشفر بـ Base64
+    const _k2 = "NTM2NTYzNzU3MjY1MjE1NjY1NjM3NDMwNzIyMzMwMzIzMjM2";
+    
+    // دالة فك التشفير (تشغيل المفاتيح)
+    function getKeys() {
+        return {
+            SECRET_KEY: atob(_k1),
+            SECRET_IV: atob(_k2)
+        };
+    }
+    
+    // ============================================================
+    // دالة التشفير
+    // ============================================================
+    function generateSecureCode(data) {
+        const keys = getKeys();
+        const text = data.join('|');
+        
+        const encrypted = CryptoJS.AES.encrypt(text, keys.SECRET_KEY, {
+            iv: CryptoJS.enc.Hex.parse(keys.SECRET_IV),
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        
+        let code = encrypted.toString();
+        code = code.replace(/=/g, '');
+        code = code.replace(/\+/g, '-');
+        code = code.replace(/\//g, '_');
+        
+        const hmac = CryptoJS.HmacSHA256(code, keys.SECRET_KEY);
+        let hmacStr = hmac.toString(CryptoJS.enc.Base64);
+        hmacStr = hmacStr.replace(/=/g, '');
+        hmacStr = hmacStr.replace(/\+/g, '-');
+        hmacStr = hmacStr.replace(/\//g, '_');
+        hmacStr = hmacStr.substring(0, 16);
+        
+        return code + '.' + hmacStr;
+    }
+
+    // ============================================================
+    // إدارة اسم المستخدم
+    // ============================================================
+    let currentUserName = localStorage.getItem('userName') || '';
+
+    function loadUserName() {
+        if (currentUserName) {
+            document.getElementById('userNameDisplay').textContent = currentUserName;
+        }
+    }
+
+    function editName() {
+        document.getElementById('nameInput').value = currentUserName || '';
+        document.getElementById('nameModal').style.display = 'flex';
+    }
+
+    function saveName() {
+        let name = document.getElementById('nameInput').value.trim();
+        if (name !== '') {
+            currentUserName = name;
+            localStorage.setItem('userName', currentUserName);
+            document.getElementById('userNameDisplay').textContent = currentUserName;
+            document.getElementById('statusMessage').innerHTML = '✅ تم تحديث الاسم';
+        }
+        closeModal();
+    }
+
+    function closeModal() {
+        document.getElementById('nameModal').style.display = 'none';
+    }
+
+    // ============================================================
+    // تغيير الصورة
+    // ============================================================
+    function changePhoto() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.getElementById('profileImage');
+                    img.src = event.target.result;
+                    localStorage.setItem('userPhoto', event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    }
+
+    function loadPhoto() {
+        const savedPhoto = localStorage.getItem('userPhoto');
+        if (savedPhoto) {
+            document.getElementById('profileImage').src = savedPhoto;
+        }
+    }
+
+    // ============================================================
+    // إدارة الموقع والفروع
+    // ============================================================
+    let currentLat = null;
+    let currentLng = null;
+    let locationReady = false;
+    let isInBranch = false;
+    let branchName = '';
+    let nearestBranch = '';
+    let nearestDistance = 0;
+
+    const COMPANY_BRANCHES = [
+        { name: 'مدينة نصر', lat: 30.068926208064294, lng: 31.34199033571489 },
+        { name: 'العبور', lat: 30.25142531737278, lng: 31.479002803202356 },
+        { name: 'العباسية', lat: 30.061954974894313, lng: 31.26445065039752 },
+        { name: 'مصر الجديدة (نبيل الوقاد)', lat: 30.080802950290707, lng: 31.334074603658262 },
+        { name: 'القاهرة الجديدة', lat: 30.012968585861348, lng: 31.440167879895455 },
+        { name: 'الحلمية', lat: 30.111320871075467, lng: 31.31881278971362 },
+        { name: 'المرج', lat: 30.1425476241019, lng: 31.336006316697855 },
+        { name: 'روض الفرج', lat: 30.08432539654208, lng: 31.234311287863704 },
+        { name: 'السلام', lat: 30.158091047462744, lng: 31.424552378070118 },
+        { name: 'الرحاب', lat: 30.067596463718328, lng: 31.481433084163065 },
+        { name: 'أبو زعبل', lat: 30.253886326653447, lng: 31.351922732038176 },
+        { name: 'الخانكة', lat: 30.21771106590487, lng: 31.368381760874875 },
+        { name: 'الخصوص', lat: 30.1494186686363, lng: 31.31065113204094 },
+        { name: 'القناطر الخيرية', lat: 30.19094000717969, lng: 31.139476503204058 },
+        { name: 'بهتيم', lat: 30.136804913283775, lng: 31.266163813985653 },
+        { name: 'شبرا الخيمة', lat: 30.118247101766705, lng: 31.24964380320595 },
+        { name: 'روكسي', lat: 30.09220224960565, lng: 31.312708734617043 },
+        { name: 'القطامية', lat: 29.996976289056462, lng: 31.418461620105212 },
+        { name: 'جمعية أحمد عرابي', lat: 30.181307997621033, lng: 31.556029714478722 },
+        { name: 'وردية سفير', lat: 30.098278247679307, lng: 31.335567378681617 },
+        { name: 'ورش بهتيم', lat: 30.13973726588311, lng: 31.273160077654822 },
+        { name: 'التيرو', lat: 30.118521455820723, lng: 31.342565841399686 },
+        { name: 'البيت', lat: 30.14280586849766, lng: 31.23461177481738 }
+    ];
+
+    const ALLOWED_RADIUS_KM = 0.1;
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function checkBranch(lat, lng) {
+        let minDistance = Infinity;
+        let nearest = '';
+        for (let branch of COMPANY_BRANCHES) {
+            const distance = calculateDistance(lat, lng, branch.lat, branch.lng);
+            if (distance <= ALLOWED_RADIUS_KM) {
+                isInBranch = true;
+                branchName = branch.name;
+                nearestDistance = distance;
+                return true;
+            }
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearest = branch.name;
+                nearestDistance = distance;
+            }
+        }
+        nearestBranch = nearest;
+        return false;
+    }
+
+    function updateButtons() {
+        const attendBtn = document.getElementById('attendBtn');
+        const leaveBtn = document.getElementById('leaveBtn');
+        const statusMsg = document.getElementById('statusMessage');
+
+        if (isInBranch) {
+            attendBtn.classList.remove('disabled');
+            attendBtn.innerHTML = '✅ تسجيل الحضور';
+            attendBtn.style.background = '#27ae60';
+            leaveBtn.classList.remove('disabled');
+            leaveBtn.innerHTML = '🚪 تسجيل الانصراف';
+            leaveBtn.style.background = '#e67e22';
+            statusMsg.innerHTML = `🗺️ ${branchName} (${(nearestDistance * 1000).toFixed(0)} متر) - الأزرار مفعلة`;
+            statusMsg.style.borderRightColor = '#27ae60';
+        } else {
+            attendBtn.classList.add('disabled');
+            attendBtn.innerHTML = '⛔ تسجيل الحضور (غير متاح)';
+            attendBtn.style.background = '#95a5a6';
+            leaveBtn.classList.add('disabled');
+            leaveBtn.innerHTML = '⛔ تسجيل الانصراف (غير متاح)';
+            leaveBtn.style.background = '#95a5a6';
+            if (nearestBranch) {
+                statusMsg.innerHTML = `🗺️ خارج النطاق. أقرب فرع: ${nearestBranch} (${(nearestDistance * 1000).toFixed(0)} متر) - المسموح 100 متر`;
+            } else {
+                statusMsg.innerHTML = '🗺️ لم يتم التعرف على أي فرع قريب';
+            }
+            statusMsg.style.borderRightColor = '#e74c3c';
+        }
+    }
+
+    function getLocation() {
+        const statusEl = document.getElementById('locationStatus');
+        statusEl.innerHTML = '🗺️ جاري تحميل الموقع...';
+        locationReady = false;
+        isInBranch = false;
+        branchName = '';
+        nearestBranch = '';
+
+        if (!navigator.geolocation) {
+            statusEl.innerHTML = '❌ متصفحك لا يدعم تحديد الموقع';
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                currentLat = pos.coords.latitude;
+                currentLng = pos.coords.longitude;
+                locationReady = true;
+                const found = checkBranch(currentLat, currentLng);
+                statusEl.innerHTML = found ? `🗺️ ${branchName}` : '🗺️ خارج النطاق';
+                updateButtons();
+            },
+            function(error) {
+                let msg = '🗺️ خطأ في الموقع';
+                if (error.code === 1) msg = '🗺️ تم رفض الموقع. اضغط هنا للمحاولة مجدداً';
+                else if (error.code === 2) msg = '🗺️ الموقع غير متاح';
+                else if (error.code === 3) msg = '🗺️ انتهى الوقت';
+                statusEl.innerHTML = msg;
+                document.getElementById('statusMessage').innerHTML = '⚠️ ' + msg;
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    }
+
+    // ============================================================
+    // إرسال البيانات مع تشفير
+    // ============================================================
+    
+    // 🔴 تم تغيير رقم المدير إلى الرقم الجديد
+    const MANAGER_PHONE = "201025828501";
+
+    function sendAttendance(type) {
+        if (!isInBranch) {
+            document.getElementById('statusMessage').innerHTML = `❌ لا يسمح بتسجيل ${type}`;
+            return;
+        }
+        if (!currentUserName) {
+            document.getElementById('statusMessage').innerHTML = '⚠️ سجل اسمك أولاً';
+            return;
+        }
+        if (!locationReady) {
+            document.getElementById('statusMessage').innerHTML = '⚠️ انتظر تحميل الموقع';
+            getLocation();
+            return;
+        }
+
+        let now = new Date();
+        let time = now.toLocaleTimeString('ar-EG');
+        let date = now.toLocaleDateString('ar-EG');
+        
+        const codeData = [currentUserName, date, time, branchName, type];
+        const secureCode = generateSecureCode(codeData);
+        
+        let record = {
+            نوع: type,
+            الموظف: currentUserName,
+            التاريخ: date,
+            الوقت: time,
+            الفرع: branchName,
+            كود_التحقق: secureCode
+        };
+
+        let allRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+        allRecords.push(record);
+        localStorage.setItem('attendanceRecords', JSON.stringify(allRecords));
+
+        let message = `📋 *تسجيل ${type}*\n`;
+        message += `👤 الموظف: ${currentUserName}\n`;
+        message += `📅 التاريخ: ${date}\n`;
+        message += `⏰ الوقت: ${time}\n`;
+        message += `📍 الفرع: ${branchName}\n`;
+        message += `🔐 الكود:\n${secureCode}`;
+
+        let url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+        
+        document.getElementById('statusMessage').innerHTML = `✅ تم تسجيل ${type} في ${branchName}\n📱 تم إرسال الكود عبر واتساب`;
+    }
+
+    window.onload = function() {
+        loadPhoto();
+        loadUserName();
+        getLocation();
+    };
+</script>
+
+</body>
+</html>
