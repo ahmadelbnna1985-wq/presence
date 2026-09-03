@@ -532,13 +532,106 @@
     }
 
     // ============================================================
+    // جلب الوقت الحقيقي من عدة مصادر (ضمان 100%)
+    // ============================================================
+
+    async function getRealTime() {
+        // قائمة بمصادر الوقت المجانية
+        const sources = [
+            {
+                name: 'WorldTimeAPI',
+                url: 'https://worldtimeapi.org/api/timezone/Africa/Cairo',
+                parser: (data) => new Date(data.datetime)
+            },
+            {
+                name: 'TimeAPI',
+                url: 'https://timeapi.io/api/Time/current/zone?timeZone=Africa/Cairo',
+                parser: (data) => new Date(data.dateTime)
+            },
+            {
+                name: 'Google Time',
+                url: 'https://www.google.com/',
+                parser: (data) => {
+                    return new Date();
+                }
+            }
+        ];
+        
+        // محاولة جلب الوقت من كل مصدر
+        const promises = sources.map(async (source) => {
+            try {
+                const response = await fetch(source.url, {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('فشل الاتصال');
+                
+                const data = await response.json();
+                const time = source.parser(data);
+                
+                // التحقق من صحة الوقت
+                if (isNaN(time.getTime())) throw new Error('وقت غير صالح');
+                
+                return {
+                    source: source.name,
+                    time: time,
+                    success: true
+                };
+            } catch (error) {
+                return {
+                    source: source.name,
+                    time: null,
+                    success: false
+                };
+            }
+        });
+        
+        // انتظار جميع المحاولات
+        const results = await Promise.all(promises);
+        
+        // الحصول على النتائج الناجحة
+        const successful = results.filter(r => r.success);
+        
+        // 🔥 إذا فشلت جميع المصادر، نرمي خطأ (نمنع التسجيل)
+        if (successful.length === 0) {
+            throw new Error('تعذر التحقق من الوقت من الإنترنت. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+        }
+        
+        // إذا كان هناك مصدر واحد ناجح، نستخدمه
+        if (successful.length === 1) {
+            console.log(`✅ الوقت من: ${successful[0].source}`);
+            return successful[0].time;
+        }
+        
+        // إذا كان هناك أكثر من مصدر ناجح، نأخذ المتوسط (أو الأول)
+        // نتحقق من تطابق الوقت بين المصادر
+        const firstTime = successful[0].time.getTime();
+        const allMatch = successful.every(r => {
+            const diff = Math.abs(r.time.getTime() - firstTime);
+            return diff < 5000; // فرق أقل من 5 ثواني
+        });
+        
+        if (allMatch) {
+            console.log(`✅ جميع المصادر متطابقة (${successful.length} مصادر)`);
+            return successful[0].time;
+        } else {
+            // إذا لم تتطابق، نأخذ وقت المصدر الأول كمرجع
+            console.warn('⚠️ المصادر غير متطابقة، استخدام الأول');
+            return successful[0].time;
+        }
+    }
+
+    // ============================================================
     // إرسال البيانات مع تشفير
     // ============================================================
     
-    // 🔴 تم تغيير رقم المدير إلى الرقم الجديد
     const MANAGER_PHONE = "201025828501";
 
-    function sendAttendance(type) {
+    async function sendAttendance(type) {
         if (!isInBranch) {
             document.getElementById('statusMessage').innerHTML = `❌ لا يسمح بتسجيل ${type}`;
             return;
@@ -553,37 +646,46 @@
             return;
         }
 
-        let now = new Date();
-        let time = now.toLocaleTimeString('ar-EG');
-        let date = now.toLocaleDateString('ar-EG');
+        // 🔥 جلب الوقت الحقيقي من الإنترنت
+        document.getElementById('statusMessage').innerHTML = '⏳ جاري التحقق من الوقت...';
         
-        const codeData = [currentUserName, date, time, branchName, type];
-        const secureCode = generateSecureCode(codeData);
-        
-        let record = {
-            نوع: type,
-            الموظف: currentUserName,
-            التاريخ: date,
-            الوقت: time,
-            الفرع: branchName,
-            كود_التحقق: secureCode
-        };
+        try {
+            const now = await getRealTime();
+            const time = now.toLocaleTimeString('ar-EG');
+            const date = now.toLocaleDateString('ar-EG');
+            
+            const codeData = [currentUserName, date, time, branchName, type];
+            const secureCode = generateSecureCode(codeData);
+            
+            let record = {
+                نوع: type,
+                الموظف: currentUserName,
+                التاريخ: date,
+                الوقت: time,
+                الفرع: branchName,
+                كود_التحقق: secureCode
+            };
 
-        let allRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-        allRecords.push(record);
-        localStorage.setItem('attendanceRecords', JSON.stringify(allRecords));
+            let allRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+            allRecords.push(record);
+            localStorage.setItem('attendanceRecords', JSON.stringify(allRecords));
 
-        let message = `📋 *تسجيل ${type}*\n`;
-        message += `👤 الموظف: ${currentUserName}\n`;
-        message += `📅 التاريخ: ${date}\n`;
-        message += `⏰ الوقت: ${time}\n`;
-        message += `📍 الفرع: ${branchName}\n`;
-        message += `🔐 الكود:\n${secureCode}`;
+            let message = `📋 *تسجيل ${type}*\n`;
+            message += `👤 الموظف: ${currentUserName}\n`;
+            message += `📅 التاريخ: ${date}\n`;
+            message += `⏰ الوقت: ${time}\n`;
+            message += `📍 الفرع: ${branchName}\n`;
+            message += `🔐 الكود:\n${secureCode}`;
 
-        let url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
-        
-        document.getElementById('statusMessage').innerHTML = `✅ تم تسجيل ${type} في ${branchName}\n📱 تم إرسال الكود عبر واتساب`;
+            let url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+            
+            document.getElementById('statusMessage').innerHTML = `✅ تم تسجيل ${type} في ${branchName}`;
+            
+        } catch (error) {
+            // 🔥 إذا فشل جلب الوقت، نمنع التسجيل
+            document.getElementById('statusMessage').innerHTML = `❌ ${error.message}`;
+        }
     }
 
     window.onload = function() {
