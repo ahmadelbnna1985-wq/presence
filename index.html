@@ -243,6 +243,27 @@
             color: #7f8c8d;
             margin-top: 6px;
         }
+        
+        /* تنسيق عرض معلومات الجهاز */
+        .device-info {
+            background: #f0f4f8;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin: 6px 0;
+            font-size: 12px;
+            color: #2c3e50;
+            border-right: 3px solid #3498db;
+            text-align: right;
+            display: none;
+        }
+        .device-info .label {
+            font-weight: bold;
+            color: #1a2b4c;
+        }
+        .device-info .value {
+            color: #3498db;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -293,13 +314,9 @@
     // 🔐 مفاتيح التشفير - مخفية باستخدام Base64
     // ============================================================
     
-    // المفتاح الأساسي مشفر بـ Base64
     const _k1 = "TjBydGhDQGlyMCMyMDI2";
-    
-    // IV مشفر بـ Base64
     const _k2 = "NTM2NTYzNzU3MjY1MjE1NjY1NjM3NDMwNzIyMzMwMzIzMjM2";
     
-    // دالة فك التشفير (تشغيل المفاتيح)
     function getKeys() {
         return {
             SECRET_KEY: atob(_k1),
@@ -333,6 +350,170 @@
         hmacStr = hmacStr.substring(0, 16);
         
         return code + '.' + hmacStr;
+    }
+
+    // ============================================================
+    // 🔥 دالة خارقة لجلب موديل الجهاز الحقيقي (محاولات متعددة)
+    // ============================================================
+    async function getDeviceModel() {
+        const model = {
+            name: 'غير معروف',
+            brand: 'غير معروف',
+            model: 'غير معروف',
+            platform: 'غير معروف'
+        };
+
+        try {
+            // ============================================
+            // المحاولة الأولى: userAgentData (الأحدث)
+            // ============================================
+            if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                try {
+                    const hints = await navigator.userAgentData.getHighEntropyValues(['model', 'platform', 'platformVersion', 'brands']);
+                    
+                    if (hints.model && hints.model !== '' && !hints.model.includes('Android')) {
+                        model.model = hints.model;
+                        // محاولة استخراج الموديل من النموذج
+                        if (model.model.includes('SM-')) {
+                            model.brand = 'Samsung';
+                        } else if (model.model.includes('iPhone')) {
+                            model.brand = 'Apple';
+                        } else if (model.model.includes('Pixel')) {
+                            model.brand = 'Google';
+                        }
+                    }
+                    
+                    if (hints.platform) {
+                        model.platform = hints.platform + (hints.platformVersion ? ' ' + hints.platformVersion : '');
+                    }
+                    
+                    if (hints.brands && hints.brands.length > 0) {
+                        // محاولة استخراج العلامة التجارية من brands
+                        const brandNames = hints.brands.map(b => b.brand);
+                        const fullBrand = brandNames.join(' ');
+                        
+                        if (fullBrand.includes('Samsung')) model.brand = 'Samsung';
+                        else if (fullBrand.includes('Google')) model.brand = 'Google';
+                        else if (fullBrand.includes('Apple')) model.brand = 'Apple';
+                        else if (fullBrand.includes('Huawei')) model.brand = 'Huawei';
+                        else if (fullBrand.includes('Xiaomi')) model.brand = 'Xiaomi';
+                        else if (fullBrand.includes('OnePlus')) model.brand = 'OnePlus';
+                        else if (fullBrand.includes('OPPO')) model.brand = 'OPPO';
+                        else if (fullBrand.includes('vivo')) model.brand = 'vivo';
+                        else if (fullBrand.includes('Realme')) model.brand = 'Realme';
+                        else if (fullBrand.includes('Nokia')) model.brand = 'Nokia';
+                        else if (fullBrand.includes('Motorola')) model.brand = 'Motorola';
+                        else if (fullBrand.includes('LG')) model.brand = 'LG';
+                        else if (fullBrand.includes('Sony')) model.brand = 'Sony';
+                    }
+                } catch (e) {}
+            }
+
+            // ============================================
+            // المحاولة الثانية: User-Agent
+            // ============================================
+            const ua = navigator.userAgent;
+            
+            // محاولة استخراج الموديل من User-Agent
+            const modelMatch = ua.match(/\(([^)]+)\)/);
+            if (modelMatch) {
+                const parts = modelMatch[1].split(';');
+                for (let part of parts) {
+                    part = part.trim();
+                    
+                    // البحث عن موديل سامسونج
+                    if (part.includes('SM-') && part.length > 5) {
+                        const samsungModel = part.match(/SM-[A-Za-z0-9]+/);
+                        if (samsungModel) {
+                            model.model = samsungModel[0];
+                            model.brand = 'Samsung';
+                        }
+                    }
+                    
+                    // البحث عن iPhone
+                    if (part.includes('iPhone')) {
+                        const iphoneMatch = part.match(/iPhone[0-9,]+/);
+                        if (iphoneMatch) {
+                            model.model = iphoneMatch[0];
+                            model.brand = 'Apple';
+                        }
+                    }
+                    
+                    // البحث عن Pixel
+                    if (part.includes('Pixel')) {
+                        const pixelMatch = part.match(/Pixel[0-9]+/);
+                        if (pixelMatch) {
+                            model.model = pixelMatch[0];
+                            model.brand = 'Google';
+                        }
+                    }
+                    
+                    // البحث عن Build/ (يسبقه الموديل)
+                    if (part.includes('Build/')) {
+                        const buildPart = part.split('Build/')[0].trim();
+                        if (buildPart && buildPart !== '' && buildPart.length > 2) {
+                            // إذا لم نجد موديل من قبل
+                            if (model.model === 'غير معروف') {
+                                model.model = buildPart;
+                                // محاولة تحديد العلامة
+                                if (buildPart.includes('SM-')) model.brand = 'Samsung';
+                                else if (buildPart.includes('Pixel')) model.brand = 'Google';
+                                else if (buildPart.includes('OnePlus')) model.brand = 'OnePlus';
+                            }
+                        }
+                    }
+                    
+                    // البحث عن اسم الجهاز بشكل عام
+                    if (part.includes('Build/') === false && part.includes('Android') === false && 
+                        part.includes('Linux') === false && part.includes('AppleWebKit') === false &&
+                        part.length > 2 && part.length < 30 && !part.includes(' ')) {
+                        if (model.model === 'غير معروف' && !part.includes(';')) {
+                            model.model = part;
+                        }
+                    }
+                }
+            }
+
+            // ============================================
+            // المحاولة الثالثة: screen + deviceMemory
+            // ============================================
+            if (model.model === 'غير معروف') {
+                // استخدام معلومات الشاشة للمساعدة في التحديد
+                const screenInfo = `${window.screen.width}x${window.screen.height}`;
+                const memory = navigator.deviceMemory || 'غير معروف';
+                
+                // محاولة تحديد الجهاز من حجم الشاشة والذاكرة (تقريبي)
+                if (screenInfo === '1080x2400' && memory >= 8) model.model = 'Samsung Galaxy S23';
+                else if (screenInfo === '1080x2340' && memory >= 6) model.model = 'Samsung Galaxy A系列';
+                else if (screenInfo === '1170x2532' && memory >= 6) model.model = 'iPhone 13/14';
+                else if (screenInfo === '1242x2688' && memory >= 4) model.model = 'iPhone XS/11 Pro';
+                else if (screenInfo === '1080x2400' && memory >= 6) model.model = 'Google Pixel 7';
+            }
+
+            // ============================================
+            // المحاولة الرابعة: إرجاع أفضل نتيجة
+            // ============================================
+            // تأكد من أن model.model ليس فارغاً أو "غير معروف"
+            if (model.model === 'غير معروف' || model.model === '' || model.model === 'null') {
+                // استخدم platform كحل أخير
+                model.model = navigator.platform || 'جهاز غير معروف';
+            }
+
+            // تنظيف الاسم
+            model.model = model.model.replace(/;/g, '').trim();
+            
+            // بناء الاسم النهائي
+            let finalName = model.model;
+            if (model.brand !== 'غير معروف' && !finalName.includes(model.brand)) {
+                finalName = model.brand + ' ' + finalName;
+            }
+            
+            return finalName;
+            
+        } catch (error) {
+            console.warn('فشل جلب موديل الجهاز:', error);
+            return navigator.platform || 'جهاز غير معروف';
+        }
     }
 
     // ============================================================
@@ -532,11 +713,10 @@
     }
 
     // ============================================================
-    // جلب الوقت الحقيقي من عدة مصادر (ضمان 100%)
+    // جلب الوقت الحقيقي من عدة مصادر
     // ============================================================
 
     async function getRealTime() {
-        // قائمة بمصادر الوقت المجانية
         const sources = [
             {
                 name: 'WorldTimeAPI',
@@ -551,82 +731,50 @@
             {
                 name: 'Google Time',
                 url: 'https://www.google.com/',
-                parser: (data) => {
-                    return new Date();
-                }
+                parser: (data) => new Date()
             }
         ];
         
-        // محاولة جلب الوقت من كل مصدر
         const promises = sources.map(async (source) => {
             try {
                 const response = await fetch(source.url, {
                     method: 'GET',
                     cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
                 
                 if (!response.ok) throw new Error('فشل الاتصال');
-                
                 const data = await response.json();
                 const time = source.parser(data);
-                
-                // التحقق من صحة الوقت
                 if (isNaN(time.getTime())) throw new Error('وقت غير صالح');
-                
-                return {
-                    source: source.name,
-                    time: time,
-                    success: true
-                };
+                return { source: source.name, time: time, success: true };
             } catch (error) {
-                return {
-                    source: source.name,
-                    time: null,
-                    success: false
-                };
+                return { source: source.name, time: null, success: false };
             }
         });
         
-        // انتظار جميع المحاولات
         const results = await Promise.all(promises);
-        
-        // الحصول على النتائج الناجحة
         const successful = results.filter(r => r.success);
         
-        // 🔥 إذا فشلت جميع المصادر، نرمي خطأ (نمنع التسجيل)
         if (successful.length === 0) {
-            throw new Error('تعذر التحقق من الوقت من الإنترنت. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+            throw new Error('تعذر التحقق من الوقت من الإنترنت.');
         }
         
-        // إذا كان هناك مصدر واحد ناجح، نستخدمه
         if (successful.length === 1) {
-            console.log(`✅ الوقت من: ${successful[0].source}`);
             return successful[0].time;
         }
         
-        // إذا كان هناك أكثر من مصدر ناجح، نأخذ المتوسط (أو الأول)
-        // نتحقق من تطابق الوقت بين المصادر
         const firstTime = successful[0].time.getTime();
         const allMatch = successful.every(r => {
             const diff = Math.abs(r.time.getTime() - firstTime);
-            return diff < 5000; // فرق أقل من 5 ثواني
+            return diff < 5000;
         });
         
-        if (allMatch) {
-            console.log(`✅ جميع المصادر متطابقة (${successful.length} مصادر)`);
-            return successful[0].time;
-        } else {
-            // إذا لم تتطابق، نأخذ وقت المصدر الأول كمرجع
-            console.warn('⚠️ المصادر غير متطابقة، استخدام الأول');
-            return successful[0].time;
-        }
+        return allMatch ? successful[0].time : successful[0].time;
     }
 
     // ============================================================
-    // إرسال البيانات مع تشفير
+    // إرسال البيانات مع تشفير + موديل الجهاز
     // ============================================================
     
     const MANAGER_PHONE = "201025828501";
@@ -646,7 +794,6 @@
             return;
         }
 
-        // 🔥 جلب الوقت الحقيقي من الإنترنت
         document.getElementById('statusMessage').innerHTML = '⏳ جاري التحقق من الوقت...';
         
         try {
@@ -654,7 +801,12 @@
             const time = now.toLocaleTimeString('ar-EG');
             const date = now.toLocaleDateString('ar-EG');
             
-            const codeData = [currentUserName, date, time, branchName, type];
+            // 🔥 جلب موديل الجهاز
+            document.getElementById('statusMessage').innerHTML = '📱 جاري جلب معلومات الجهاز...';
+            const deviceModel = await getDeviceModel();
+            
+            // 🔥 ربط الموديل بالكود المشفر
+            const codeData = [currentUserName, date, time, branchName, type, deviceModel];
             const secureCode = generateSecureCode(codeData);
             
             let record = {
@@ -663,6 +815,7 @@
                 التاريخ: date,
                 الوقت: time,
                 الفرع: branchName,
+                موديل_الجهاز: deviceModel,
                 كود_التحقق: secureCode
             };
 
@@ -670,11 +823,13 @@
             allRecords.push(record);
             localStorage.setItem('attendanceRecords', JSON.stringify(allRecords));
 
+            // رسالة واتساب
             let message = `📋 *تسجيل ${type}*\n`;
             message += `👤 الموظف: ${currentUserName}\n`;
             message += `📅 التاريخ: ${date}\n`;
             message += `⏰ الوقت: ${time}\n`;
             message += `📍 الفرع: ${branchName}\n`;
+            message += `📱 الجهاز: ${deviceModel}\n`;
             message += `🔐 الكود:\n${secureCode}`;
 
             let url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(message)}`;
@@ -683,7 +838,6 @@
             document.getElementById('statusMessage').innerHTML = `✅ تم تسجيل ${type} في ${branchName}`;
             
         } catch (error) {
-            // 🔥 إذا فشل جلب الوقت، نمنع التسجيل
             document.getElementById('statusMessage').innerHTML = `❌ ${error.message}`;
         }
     }
