@@ -251,7 +251,7 @@
         }
 
         /* ========================================== */
-        /* نافذة الإبلاغ المنبثقة (معدلة) */
+        /* نافذة الإبلاغ المنبثقة */
         /* ========================================== */
         .report-modal-overlay {
             position: fixed;
@@ -962,7 +962,13 @@
 
                 let messageText = `📢 *إبلاغ جديد*\n`;
                 messageText += `👤 الموظف: ${currentUserName || 'غير مسجل'}\n`;
-                messageText += `📌 نوع الإبلاغ: ${selectedType}`;
+                
+                // 🔥 تغيير اسم النوع في الرسالة
+                let typeName = selectedType;
+                if (selectedType === 'مأمورية مصلحية') {
+                    typeName = 'مأمورية';
+                }
+                messageText += `📌 نوع الإبلاغ: ${typeName}`;
 
                 // الحقول حسب النوع
                 if (selectedType === 'مأمورية مصلحية') {
@@ -979,7 +985,6 @@
                         return;
                     }
 
-                    // 🔥 التحقق من تساوي التاريخين
                     if (fromDate === toDate) {
                         messageText += `\n📅 التاريخ: ${fromDate}`;
                     } else {
