@@ -251,7 +251,7 @@
         }
 
         /* ========================================== */
-        /* نافذة الإبلاغ المنبثقة (Report Modal) */
+        /* نافذة الإبلاغ المنبثقة (معدلة) */
         /* ========================================== */
         .report-modal-overlay {
             position: fixed;
@@ -269,108 +269,130 @@
         }
         .report-modal {
             background: #ffffff;
-            width: 90%;
+            width: 92%;
             max-width: 450px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
         .report-modal-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 14px 20px;
+            padding: 16px 20px;
             background: #f8f9fa;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid #eee;
         }
         .report-modal-header h3 {
             margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .close-btn {
-            background: transparent;
-            border: none;
-            font-size: 24px;
-            font-weight: bold;
-            color: #777;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .close-btn:hover {
-            color: #000;
+            font-size: 20px;
+            color: #1a1a2e;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
         .report-modal-body {
-            padding: 20px;
+            padding: 20px 22px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .form-group label {
             display: block;
             margin-bottom: 6px;
             font-weight: bold;
-            color: #444;
+            color: #333;
             font-size: 14px;
             text-align: right;
         }
         .form-control {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
             box-sizing: border-box;
-            font-size: 14px;
+            font-size: 15px;
             text-align: right;
+            background: #fafafa;
+            transition: border-color 0.3s;
         }
         .form-control:focus {
             border-color: #3498db;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+            background: white;
+        }
+        .form-control select {
+            appearance: auto;
+            cursor: pointer;
         }
         .date-range {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
         .date-range div {
             flex: 1;
         }
+        .date-range input[type="date"] {
+            padding: 10px 8px;
+        }
         .report-modal-footer {
             display: flex;
-            justify-content: space-between;
-            padding: 14px 20px;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 20px 20px;
             background: #f8f9fa;
-            border-top: 1px solid #eee;
+            border-top: 2px solid #eee;
         }
         .btn-submit {
             background: #25D366;
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 28px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
+            min-width: 120px;
+            transition: all 0.3s;
         }
         .btn-submit:hover {
             background: #128C7E;
+            transform: scale(1.02);
+        }
+        .btn-submit:active {
+            transform: scale(0.97);
         }
         .btn-cancel-modal {
             background: #6c757d;
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 28px;
+            border-radius: 50px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
+            min-width: 120px;
+            transition: all 0.3s;
         }
         .btn-cancel-modal:hover {
             background: #5a6268;
+            transform: scale(1.02);
+        }
+        .btn-cancel-modal:active {
+            transform: scale(0.97);
         }
         .hidden {
             display: none !important;
+        }
+        .report-modal-body .form-group:last-child {
+            margin-bottom: 0;
+        }
+        .date-range .form-group {
+            margin-bottom: 0;
+        }
+        .mission-field {
+            margin-top: 16px;
         }
     </style>
 </head>
@@ -397,7 +419,6 @@
         <button class="btn-attend disabled" onclick="sendAttendance('حضور')" id="attendBtn">✅ تسجيل الحضور</button>
         <button class="btn-leave disabled" onclick="sendAttendance('انصراف')" id="leaveBtn">🚪 تسجيل الانصراف</button>
 
-        <!-- 🔥 زر الإبلاغ -->
         <button class="btn-report" id="btn-main-report">📢 إبلاغ</button>
 
         <div id="statusMessage">
@@ -421,7 +442,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         // ============================================================
-        // 🔐 مفاتيح التشفير - مخفية باستخدام Base64
+        // 🔐 مفاتيح التشفير
         // ============================================================
         const _k1 = "TjBydGhDQGlyMCMyMDI2";
         const _k2 = "NTM2NTYzNzU3MjY1MjE1NjY1NjM3NDMwNzIyMzMwMzIzMjM2";
@@ -581,14 +602,14 @@
 
         const COMPANY_BRANCHES = [
             { name: 'مدينة نصر', lat: 30.068926208064294, lng: 31.34199033571489 },
-			{ name: 'التنفيذ الذاتي', lat: 30.09188517563146, lng: 31.286870073945558 },
-			{ name: 'مخزن نصر المركزي', lat: 30.03983899766396, lng: 31.356146587125803 },
-			{ name: 'مخزن الهجانه', lat: 30.057123505393356, lng: 31.378902185605806 },
-			{ name: 'مخزن باسوس', lat: 30.136434421840203, lng: 31.218935974042523 },
-			{ name: 'ورش المحولات', lat: 30.037422767456572, lng: 31.360150090545975 },
-			{ name: 'مرتجعات العبور', lat: 30.20443882591028, lng: 31.454169503097713 },
-			{ name: 'مخزن عدادات التبه', lat: 30.059038154831665, lng: 31.37347268050408 },
-			{ name: 'مخزن المطبوعات', lat: 30.121944107644612, lng: 31.364098551563476 },
+            { name: 'التنفيذ الذاتي', lat: 30.09188517563146, lng: 31.286870073945558 },
+            { name: 'مخزن نصر المركزي', lat: 30.03983899766396, lng: 31.356146587125803 },
+            { name: 'مخزن الهجانه', lat: 30.057123505393356, lng: 31.378902185605806 },
+            { name: 'مخزن باسوس', lat: 30.136434421840203, lng: 31.218935974042523 },
+            { name: 'ورش المحولات', lat: 30.037422767456572, lng: 31.360150090545975 },
+            { name: 'مرتجعات العبور', lat: 30.20443882591028, lng: 31.454169503097713 },
+            { name: 'مخزن عدادات التبه', lat: 30.059038154831665, lng: 31.37347268050408 },
+            { name: 'مخزن المطبوعات', lat: 30.121944107644612, lng: 31.364098551563476 },
             { name: 'العبور', lat: 30.25142531737278, lng: 31.479002803202356 },
             { name: 'العباسية', lat: 30.061954974894313, lng: 31.26445065039752 },
             { name: 'مصر الجديدة (نبيل الوقاد)', lat: 30.080802950290707, lng: 31.334074603658262 },
@@ -820,23 +841,21 @@
         }
 
         // ============================================================
-        // 🔥 زر الإبلاغ - نافذة منبثقة (بدون كود تشفير)
+        // 🔥 زر الإبلاغ - نافذة منبثقة (معدلة)
         // ============================================================
 
         document.getElementById('btn-main-report').addEventListener('click', openReportModal);
 
         function openReportModal() {
-            // منع تكرار النافذة
             if (document.getElementById('report-modal-overlay')) return;
 
             const overlay = document.createElement('div');
             overlay.id = 'report-modal-overlay';
             overlay.className = 'report-modal-overlay';
 
-            // منع الإغلاق عند الضغط خارج النافذة
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) {
-                    // لا تفعل شيء - النافذة لا تغلق
+                    // لا تغلق النافذة
                 }
             });
 
@@ -844,7 +863,6 @@
             <div class="report-modal">
               <div class="report-modal-header">
                 <h3>📢 تقديم إبلاغ</h3>
-                <button type="button" class="close-btn" id="modal-top-close">&times;</button>
               </div>
               <div class="report-modal-body">
                 <div class="form-group">
@@ -859,28 +877,38 @@
                   </select>
                 </div>
 
-                <!-- حقل مكان المأمورية -->
-                <div id="mission-field" class="form-group hidden">
-                  <label for="mission-location">مكان المأمورية</label>
-                  <input type="text" id="mission-location" class="form-control" placeholder="أدخل مكان المأمورية">
-                </div>
+                <!-- 🔥 حقول التاريخ (تظهر حسب الاختيار) -->
+                <div id="date-fields-container">
+                  <!-- حقل تاريخ واحد -->
+                  <div id="single-date-field" class="form-group hidden">
+                    <label for="single-date">التاريخ</label>
+                    <input type="date" id="single-date" class="form-control">
+                  </div>
 
-                <!-- حقول تاريخ الإجازة -->
-                <div id="vacation-fields" class="form-group hidden">
-                  <div class="date-range">
-                    <div>
-                      <label for="vacation-from">من تاريخ</label>
-                      <input type="date" id="vacation-from" class="form-control">
-                    </div>
-                    <div>
-                      <label for="vacation-to">إلى تاريخ</label>
-                      <input type="date" id="vacation-to" class="form-control">
+                  <!-- حقول من تاريخ - إلى تاريخ -->
+                  <div id="range-date-field" class="form-group hidden">
+                    <div class="date-range">
+                      <div>
+                        <label for="date-from">من تاريخ</label>
+                        <input type="date" id="date-from" class="form-control">
+                      </div>
+                      <div>
+                        <label for="date-to">إلى تاريخ</label>
+                        <input type="date" id="date-to" class="form-control">
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- حقل المكان (يظهر فقط عند اختيار مأمورية مصلحية) -->
+                <div id="mission-field" class="form-group hidden mission-field">
+                  <label for="mission-location">المكان</label>
+                  <input type="text" id="mission-location" class="form-control" placeholder="أدخل المكان">
+                </div>
+
               </div>
               <div class="report-modal-footer">
-                <button type="button" class="btn-submit" id="btn-submit-report">📤 إرسال عبر الواتساب</button>
+                <button type="button" class="btn-submit" id="btn-submit-report">📤 إرسال</button>
                 <button type="button" class="btn-cancel-modal" id="modal-bottom-close">إغلاق</button>
               </div>
             </div>
@@ -890,22 +918,29 @@
 
             // عناصر النافذة
             const reportTypeSelect = overlay.querySelector('#report-type');
+            const singleDateField = overlay.querySelector('#single-date-field');
+            const rangeDateField = overlay.querySelector('#range-date-field');
             const missionField = overlay.querySelector('#mission-field');
-            const vacationFields = overlay.querySelector('#vacation-fields');
-            const topCloseBtn = overlay.querySelector('#modal-top-close');
             const bottomCloseBtn = overlay.querySelector('#modal-bottom-close');
             const submitBtn = overlay.querySelector('#btn-submit-report');
 
-            // إظهار وإخفاء الحقول حسب الاختيار
+            // 🔥 إظهار وإخفاء الحقول حسب الاختيار
             reportTypeSelect.addEventListener('change', function(e) {
                 const value = e.target.value;
+
+                singleDateField.classList.add('hidden');
+                rangeDateField.classList.add('hidden');
                 missionField.classList.add('hidden');
-                vacationFields.classList.add('hidden');
 
                 if (value === 'مأمورية مصلحية') {
+                    rangeDateField.classList.remove('hidden');
                     missionField.classList.remove('hidden');
+                } else if (value === 'راحة سهر العبور') {
+                    rangeDateField.classList.remove('hidden');
                 } else if (value === 'إجازة') {
-                    vacationFields.classList.remove('hidden');
+                    rangeDateField.classList.remove('hidden');
+                } else if (value === 'إذن صباحي' || value === 'إذن مسائي') {
+                    singleDateField.classList.remove('hidden');
                 }
             });
 
@@ -913,7 +948,6 @@
             const closeModal = function() {
                 overlay.remove();
             };
-            topCloseBtn.addEventListener('click', closeModal);
             bottomCloseBtn.addEventListener('click', closeModal);
 
             // ==========================================
@@ -930,25 +964,64 @@
                 messageText += `👤 الموظف: ${currentUserName || 'غير مسجل'}\n`;
                 messageText += `📌 نوع الإبلاغ: ${selectedType}`;
 
+                // الحقول حسب النوع
                 if (selectedType === 'مأمورية مصلحية') {
+                    const fromDate = overlay.querySelector('#date-from').value;
+                    const toDate = overlay.querySelector('#date-to').value;
                     const location = overlay.querySelector('#mission-location').value.trim();
+
+                    if (!fromDate || !toDate) {
+                        alert('يرجى تحديد تاريخ البداية والنهاية للمأمورية');
+                        return;
+                    }
                     if (!location) {
                         alert('يرجى كتابة مكان المأمورية');
                         return;
                     }
-                    messageText += `\n📍 مكان المأمورية: ${location}`;
+
+                    // 🔥 التحقق من تساوي التاريخين
+                    if (fromDate === toDate) {
+                        messageText += `\n📅 التاريخ: ${fromDate}`;
+                    } else {
+                        messageText += `\n📅 من تاريخ: ${fromDate}`;
+                        messageText += `\n📅 إلى تاريخ: ${toDate}`;
+                    }
+                    messageText += `\n📍 المكان: ${location}`;
+                } else if (selectedType === 'راحة سهر العبور') {
+                    const fromDate = overlay.querySelector('#date-from').value;
+                    const toDate = overlay.querySelector('#date-to').value;
+                    if (!fromDate || !toDate) {
+                        alert('يرجى تحديد تاريخ البداية والنهاية لراحة سهر العبور');
+                        return;
+                    }
+                    if (fromDate === toDate) {
+                        messageText += `\n📅 التاريخ: ${fromDate}`;
+                    } else {
+                        messageText += `\n📅 من تاريخ: ${fromDate}`;
+                        messageText += `\n📅 إلى تاريخ: ${toDate}`;
+                    }
                 } else if (selectedType === 'إجازة') {
-                    const fromDate = overlay.querySelector('#vacation-from').value;
-                    const toDate = overlay.querySelector('#vacation-to').value;
+                    const fromDate = overlay.querySelector('#date-from').value;
+                    const toDate = overlay.querySelector('#date-to').value;
                     if (!fromDate || !toDate) {
                         alert('يرجى تحديد تاريخ البداية والنهاية للإجازة');
                         return;
                     }
-                    messageText += `\n📅 من تاريخ: ${fromDate}`;
-                    messageText += `\n📅 إلى تاريخ: ${toDate}`;
+                    if (fromDate === toDate) {
+                        messageText += `\n📅 التاريخ: ${fromDate}`;
+                    } else {
+                        messageText += `\n📅 من تاريخ: ${fromDate}`;
+                        messageText += `\n📅 إلى تاريخ: ${toDate}`;
+                    }
+                } else if (selectedType === 'إذن صباحي' || selectedType === 'إذن مسائي') {
+                    const singleDate = overlay.querySelector('#single-date').value;
+                    if (!singleDate) {
+                        alert('يرجى تحديد تاريخ الإذن');
+                        return;
+                    }
+                    messageText += `\n📅 التاريخ: ${singleDate}`;
                 }
 
-                // إرسال بدون كود تشفير
                 const whatsappUrl = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(messageText)}`;
                 window.open(whatsappUrl, '_blank');
 
