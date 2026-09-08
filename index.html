@@ -160,6 +160,21 @@
         .btn-report:active {
             background: #b52a38;
         }
+        .btn-location {
+            background: #2e86c1;
+        }
+        .btn-location:active {
+            background: #1a5276;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 6px 0;
+        }
+        .btn-group button {
+            flex: 1;
+            margin: 0;
+        }
         .disabled {
             opacity: 0.4;
             pointer-events: none;
@@ -394,6 +409,102 @@
         .mission-field {
             margin-top: 16px;
         }
+
+        /* ========================================== */
+        /* نافذة اختيار الفرع                        */
+        /* ========================================== */
+        .branch-modal {
+            background: #ffffff;
+            width: 92%;
+            max-width: 450px;
+            max-height: 80vh;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .branch-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #eee;
+        }
+        .branch-modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+        .branch-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            padding: 0 8px;
+            transition: 0.3s;
+        }
+        .branch-modal-close:hover {
+            color: #333;
+            transform: rotate(90deg);
+        }
+        .branch-modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .branch-search {
+            margin-bottom: 16px;
+        }
+        .branch-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .branch-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 12px;
+            border: 2px solid transparent;
+        }
+        .branch-item:hover {
+            background: #e8f4fd;
+            border-color: #3498db;
+            transform: translateX(-5px);
+        }
+        .branch-item:active {
+            transform: scale(0.97);
+        }
+        .branch-icon {
+            font-size: 20px;
+        }
+        .branch-name {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a2b4c;
+        }
+        .branch-arrow {
+            color: #3498db;
+            font-size: 18px;
+        }
+        .branch-modal-footer {
+            padding: 14px 20px;
+            background: #f8f9fa;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -419,7 +530,11 @@
         <button class="btn-attend disabled" onclick="sendAttendance('حضور')" id="attendBtn">✅ تسجيل الحضور</button>
         <button class="btn-leave disabled" onclick="sendAttendance('انصراف')" id="leaveBtn">🚪 تسجيل الانصراف</button>
 
-        <button class="btn-report" id="btn-main-report">📢 إبلاغ</button>
+        <!-- 🔥 زر الإبلاغ وزر الوصول للفرع جنب بعض -->
+        <div class="btn-group">
+            <button class="btn-report" id="btn-main-report">📢 إبلاغ</button>
+            <button class="btn-location" id="btn-branch-location">🗺️ الوصول للفرع</button>
+        </div>
 
         <div id="statusMessage">
             ⏳ انتظر... جاري تجهيز البيانات
@@ -601,7 +716,7 @@
         let nearestDistance = 0;
 
         const COMPANY_BRANCHES = [
-            { name: 'مدينة نصر', lat: 30.068926208064294, lng: 31.34199033571489 },
+            { name: 'مدينة نصر', lat: 30.068794367106186, lng: 31.342048638998207 },
             { name: 'التنفيذ الذاتي', lat: 30.09188517563146, lng: 31.286870073945558 },
             { name: 'مخزن نصر المركزي', lat: 30.03983899766396, lng: 31.356146587125803 },
             { name: 'مخزن الهجانه', lat: 30.057123505393356, lng: 31.378902185605806 },
@@ -610,29 +725,33 @@
             { name: 'مرتجعات العبور', lat: 30.20443882591028, lng: 31.454169503097713 },
             { name: 'مخزن عدادات التبه', lat: 30.059038154831665, lng: 31.37347268050408 },
             { name: 'مخزن المطبوعات', lat: 30.121944107644612, lng: 31.364098551563476 },
-            { name: 'العبور', lat: 30.25142531737278, lng: 31.479002803202356 },
+            { name: 'العبور', lat: 30.25138838607755, lng: 31.478960426214858 },
             { name: 'العباسية', lat: 30.061954974894313, lng: 31.26445065039752 },
-            { name: 'مصر الجديدة (نبيل الوقاد)', lat: 30.080802950290707, lng: 31.334074603658262 },
+            { name: 'نبيل الوقاد', lat: 30.080802950290707, lng: 31.334074603658262 },
             { name: 'القاهرة الجديدة', lat: 30.012968585861348, lng: 31.440167879895455 },
-            { name: 'الحلمية', lat: 30.111320871075467, lng: 31.31881278971362 },
-            { name: 'المرج', lat: 30.1425476241019, lng: 31.336006316697855 },
-            { name: 'روض الفرج', lat: 30.08432539654208, lng: 31.234311287863704 },
+            { name: 'الحلمية', lat: 30.111308310294348, lng: 31.31911190775816 },
+            { name: 'المرج', lat: 30.142402820156548, lng: 31.33605271750825 },
+            { name: 'نادي التجديف', lat: 30.06666085952713, lng: 31.215770829396796 },
+            { name: 'نادي الكهرباء', lat: 30.08487743335992, lng: 31.233007550423128 },
+            { name: 'روض الفرج', lat: 30.084581208150162, lng: 31.23457774384774 },
+            { name: 'شبكات شبرا', lat: 30.084338988456338, lng: 31.234462177746195 },
+            { name: 'شبرا مصر', lat: 30.084113575687688, lng: 31.234336999720362 },
             { name: 'السلام', lat: 30.158091047462744, lng: 31.424552378070118 },
-            { name: 'الرحاب', lat: 30.067596463718328, lng: 31.481433084163065 },
+            { name: 'الرحاب', lat: 30.0674235390887, lng: 31.48149345590195 },
             { name: 'أبو زعبل', lat: 30.253683819614064, lng: 31.35286981285509 },
-            { name: 'الخانكة', lat: 30.21771106590487, lng: 31.368381760874875 },
-            { name: 'الخصوص', lat: 30.1494186686363, lng: 31.31065113204094 },
+            { name: 'الخانكة', lat: 30.217655306732635, lng: 31.36846052497077 },
+            { name: 'الخصوص', lat: 30.14376396916931, lng: 31.311714850323302 },
             { name: 'القناطر الخيرية', lat: 30.19094000717969, lng: 31.139476503204058 },
             { name: 'بهتيم', lat: 30.136560404801553, lng: 31.26280571682546 },
-            { name: 'شبرا الخيمة', lat: 30.118247101766705, lng: 31.24964380320595 },
-            { name: 'روكسي', lat: 30.09220224960565, lng: 31.312708734617043 },
-            { name: 'القطامية', lat: 29.996976289056462, lng: 31.418461620105212 },
-            { name: 'جمعية أحمد عرابي', lat: 30.181307997621033, lng: 31.556029714478722 },
+            { name: 'شبرا الخيمة', lat: 30.117876968143094, lng: 31.249593533678716 },
+            { name: 'روكسي', lat: 30.091886559208294, lng: 31.312644332070647 },
+            { name: 'القطامية', lat: 29.994274442655982, lng: 31.41885534206382 },
+            { name: 'جمعية أحمد عرابي', lat: 30.179795833965976, lng: 31.55572985134735 },
             { name: 'وردية سفير', lat: 30.098278247679307, lng: 31.335567378681617 },
-            { name: 'ورش بهتيم', lat: 30.13973726588311, lng: 31.273160077654822 },
-            { name: 'التيرو', lat: 30.118521455820723, lng: 31.342565841399686 },
-            { name: 'مركز تدريب شيكولاني', lat: 30.074854479551437, lng: 31.24764057624799 },
-            { name: 'البيت', lat: 30.14280586849766, lng: 31.23461177481738 }
+            { name: 'ورش بهتيم', lat: 30.139901490960877, lng: 31.2733748026794 },
+            { name: 'التيرو', lat: 30.1183265878258, lng: 31.342541665204074 },
+            { name: 'تدريب شيكولاني', lat: 30.074854479551437, lng: 31.24764057624799 },
+            { name: 'تجريبي', lat: 30.14280586849766, lng: 31.23461177481738 }
         ];
 
         const ALLOWED_RADIUS_KM = 0.1;
@@ -841,7 +960,7 @@
         }
 
         // ============================================================
-        // 🔥 زر الإبلاغ - نافذة منبثقة (معدلة)
+        // 🔥 زر الإبلاغ - نافذة منبثقة
         // ============================================================
 
         document.getElementById('btn-main-report').addEventListener('click', openReportModal);
@@ -877,15 +996,11 @@
                   </select>
                 </div>
 
-                <!-- 🔥 حقول التاريخ (تظهر حسب الاختيار) -->
                 <div id="date-fields-container">
-                  <!-- حقل تاريخ واحد -->
                   <div id="single-date-field" class="form-group hidden">
                     <label for="single-date">التاريخ</label>
                     <input type="date" id="single-date" class="form-control">
                   </div>
-
-                  <!-- حقول من تاريخ - إلى تاريخ -->
                   <div id="range-date-field" class="form-group hidden">
                     <div class="date-range">
                       <div>
@@ -900,7 +1015,6 @@
                   </div>
                 </div>
 
-                <!-- حقل المكان (يظهر فقط عند اختيار مأمورية مصلحية) -->
                 <div id="mission-field" class="form-group hidden mission-field">
                   <label for="mission-location">المكان</label>
                   <input type="text" id="mission-location" class="form-control" placeholder="أدخل المكان">
@@ -916,7 +1030,6 @@
 
             document.body.appendChild(overlay);
 
-            // عناصر النافذة
             const reportTypeSelect = overlay.querySelector('#report-type');
             const singleDateField = overlay.querySelector('#single-date-field');
             const rangeDateField = overlay.querySelector('#range-date-field');
@@ -924,7 +1037,6 @@
             const bottomCloseBtn = overlay.querySelector('#modal-bottom-close');
             const submitBtn = overlay.querySelector('#btn-submit-report');
 
-            // 🔥 إظهار وإخفاء الحقول حسب الاختيار
             reportTypeSelect.addEventListener('change', function(e) {
                 const value = e.target.value;
 
@@ -944,15 +1056,11 @@
                 }
             });
 
-            // إغلاق النافذة
             const closeModal = function() {
                 overlay.remove();
             };
             bottomCloseBtn.addEventListener('click', closeModal);
 
-            // ==========================================
-            // إرسال الإبلاغ عبر الواتساب (بدون كود)
-            // ==========================================
             submitBtn.addEventListener('click', function() {
                 const selectedType = reportTypeSelect.value;
                 if (!selectedType) {
@@ -963,14 +1071,12 @@
                 let messageText = `📢 *إبلاغ جديد*\n`;
                 messageText += `👤 الموظف: ${currentUserName || 'غير مسجل'}\n`;
                 
-                // 🔥 تغيير اسم النوع في الرسالة
                 let typeName = selectedType;
                 if (selectedType === 'مأمورية مصلحية') {
                     typeName = 'مأمورية';
                 }
                 messageText += `📌 نوع الإبلاغ: ${typeName}`;
 
-                // الحقول حسب النوع
                 if (selectedType === 'مأمورية مصلحية') {
                     const fromDate = overlay.querySelector('#date-from').value;
                     const toDate = overlay.querySelector('#date-to').value;
@@ -1032,6 +1138,93 @@
 
                 closeModal();
             });
+        }
+
+        // ============================================================
+        // 🗺️ زر الوصول للفرع - نافذة اختيار الفرع
+        // ============================================================
+
+        document.getElementById('btn-branch-location').addEventListener('click', openBranchModal);
+
+        function openBranchModal() {
+            if (document.getElementById('branch-modal-overlay')) return;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'branch-modal-overlay';
+            overlay.className = 'report-modal-overlay';
+
+            let branchesHTML = '';
+            COMPANY_BRANCHES.forEach((branch, index) => {
+                branchesHTML += `
+                    <div class="branch-item" data-index="${index}" data-lat="${branch.lat}" data-lng="${branch.lng}" data-name="${branch.name}">
+                        <span class="branch-icon">📍</span>
+                        <span class="branch-name">${branch.name}</span>
+                        <span class="branch-arrow">➡️</span>
+                    </div>
+                `;
+            });
+
+            overlay.innerHTML = `
+                <div class="branch-modal">
+                    <div class="branch-modal-header">
+                        <h3>🗺️ اختر الفرع للوصول</h3>
+                        <button class="branch-modal-close" id="branch-close-btn">✕</button>
+                    </div>
+                    <div class="branch-modal-body">
+                        <div class="branch-search">
+                            <input type="text" id="branch-search-input" placeholder="🔍 ابحث عن فرع..." class="form-control">
+                        </div>
+                        <div class="branch-list" id="branch-list">
+                            ${branchesHTML}
+                        </div>
+                    </div>
+                    <div class="branch-modal-footer">
+                        <button class="btn-cancel-modal" id="branch-close-bottom">❌ إغلاق</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            // إغلاق النافذة
+            const closeModal = () => overlay.remove();
+            document.getElementById('branch-close-btn').addEventListener('click', closeModal);
+            document.getElementById('branch-close-bottom').addEventListener('click', closeModal);
+
+            // البحث في الفروع
+            const searchInput = document.getElementById('branch-search-input');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.trim().toLowerCase();
+                const items = overlay.querySelectorAll('.branch-item');
+                items.forEach(item => {
+                    const name = item.dataset.name.toLowerCase();
+                    if (name.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // عند الضغط على أي فرع → فتح الخريطة
+            const branchItems = overlay.querySelectorAll('.branch-item');
+            branchItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const lat = this.dataset.lat;
+                    const lng = this.dataset.lng;
+                    const name = this.dataset.name;
+                    openGoogleMaps(lat, lng, name);
+                    closeModal();
+                });
+            });
+        }
+
+        // ============================================================
+        // 🗺️ فتح خرائط جوجل
+        // ============================================================
+        function openGoogleMaps(lat, lng, name) {
+            const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(name)}`;
+            window.open(url, '_blank');
         }
 
         // ============================================================
