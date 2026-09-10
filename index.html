@@ -154,7 +154,6 @@
         .btn-leave:active {
             background: #ca6f1e;
         }
-        /* 🔥 زر الإبلاغ باللون البطيخي */
         .btn-report {
             background: #e83e8c;
         }
@@ -180,6 +179,11 @@
             opacity: 0.4;
             pointer-events: none;
             filter: grayscale(0.8);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
         }
         #statusMessage {
             margin-top: 10px;
@@ -266,9 +270,6 @@
             margin-top: 6px;
         }
 
-        /* ========================================== */
-        /* نافذة الإبلاغ المنبثقة */
-        /* ========================================== */
         .report-modal-overlay {
             position: fixed;
             top: 0;
@@ -377,8 +378,10 @@
             background: #128C7E;
             transform: scale(1.02);
         }
-        .btn-submit:active {
-            transform: scale(0.97);
+        .btn-submit:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
         }
         .btn-cancel-modal {
             background: #6c757d;
@@ -395,9 +398,6 @@
             background: #5a6268;
             transform: scale(1.02);
         }
-        .btn-cancel-modal:active {
-            transform: scale(0.97);
-        }
         .hidden {
             display: none !important;
         }
@@ -411,10 +411,6 @@
             margin-top: 16px;
         }
 
-        /* ========================================== */
-        /* نافذة اختيار الفرع - النسخة المُحسّنة     */
-        /* ========================================== */
-
         .branch-modal {
             background: #ffffff;
             width: 92%;
@@ -427,7 +423,6 @@
             overflow: hidden;
             animation: branchFadeIn 0.3s ease;
         }
-
         @keyframes branchFadeIn {
             from {
                 opacity: 0;
@@ -438,14 +433,12 @@
                 transform: scale(1) translateY(0);
             }
         }
-
         .branch-modal-header {
             padding: 22px 20px 16px 20px;
             background: linear-gradient(135deg, #f8f9fa 0%, #e8f4fd 100%);
             border-bottom: 3px solid #3498db;
             text-align: center;
         }
-
         .branch-modal-header h3 {
             margin: 0;
             font-size: 24px;
@@ -454,23 +447,15 @@
             letter-spacing: 0.5px;
             display: inline-block;
         }
-
-        /* شيل رمز الإغلاق من الأعلى */
-        .branch-modal-close {
-            display: none !important;
-        }
-
         .branch-modal-body {
             padding: 20px 22px 16px 22px;
             overflow-y: auto;
             flex: 1;
             background: #ffffff;
         }
-
         .branch-search {
             margin-bottom: 14px;
         }
-
         .branch-search .form-control {
             padding: 14px 18px;
             border: 2px solid #e0e7ef;
@@ -481,18 +466,11 @@
             transition: all 0.3s ease;
             text-align: right;
         }
-
         .branch-search .form-control:focus {
             border-color: #3498db;
             box-shadow: 0 0 0 4px rgba(52,152,219,0.12);
             background: #ffffff;
         }
-
-        .branch-search .form-control::placeholder {
-            color: #9aa8b9;
-            font-weight: 400;
-        }
-
         .branch-list {
             display: flex;
             flex-direction: column;
@@ -501,20 +479,6 @@
             overflow-y: auto;
             padding: 2px 0;
         }
-
-        /* تخصيص شريط التمرير */
-        .branch-list::-webkit-scrollbar {
-            width: 5px;
-        }
-        .branch-list::-webkit-scrollbar-track {
-            background: #f1f3f5;
-            border-radius: 10px;
-        }
-        .branch-list::-webkit-scrollbar-thumb {
-            background: #3498db;
-            border-radius: 10px;
-        }
-
         .branch-item {
             display: flex;
             align-items: center;
@@ -527,18 +491,12 @@
             border: 2px solid #eef2f7;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-
         .branch-item:hover {
             background: #f0f7fe;
             border-color: #3498db;
             transform: translateX(-6px);
             box-shadow: 0 6px 20px rgba(52,152,219,0.15);
         }
-
-        .branch-item:active {
-            transform: scale(0.97);
-        }
-
         .branch-icon {
             font-size: 22px;
             flex-shrink: 0;
@@ -550,7 +508,6 @@
             background: #e8f4fd;
             border-radius: 50%;
         }
-
         .branch-name {
             flex: 1;
             font-size: 17px;
@@ -558,7 +515,6 @@
             color: #1a2b4c;
             letter-spacing: 0.3px;
         }
-
         .branch-arrow {
             color: #3498db;
             font-size: 20px;
@@ -566,12 +522,10 @@
             opacity: 0.6;
             transition: all 0.3s ease;
         }
-
         .branch-item:hover .branch-arrow {
             opacity: 1;
             transform: translateX(-4px);
         }
-
         .branch-modal-footer {
             padding: 16px 20px 20px 20px;
             background: #f8fafc;
@@ -580,8 +534,6 @@
             justify-content: center;
             gap: 12px;
         }
-
-        /* 🔥 زر الإغلاق باللون الأحمر */
         .branch-modal-footer .btn-cancel-modal {
             padding: 14px 40px;
             border-radius: 50px;
@@ -595,20 +547,10 @@
             min-width: 160px;
             letter-spacing: 0.5px;
         }
-
         .branch-modal-footer .btn-cancel-modal:hover {
             background: #b52a38 !important;
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(220,53,69,0.3);
-        }
-
-        .branch-modal-footer .btn-cancel-modal:active {
-            transform: scale(0.97);
-        }
-
-        /* شيل عداد الفروع */
-        .branch-count {
-            display: none !important;
         }
     </style>
 </head>
@@ -646,7 +588,6 @@
         <div class="note">📍 الأزرار تعمل فقط عند تطابق الموقع مع أحد فروع الشركة</div>
     </div>
 
-    <!-- مودال تغيير الاسم -->
     <div class="modal" id="nameModal">
         <div class="modal-content">
             <h3>✏️ تغيير الاسم</h3>
@@ -661,6 +602,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         // ============================================================
+        // 🌐 رابط Google Apps Script Web App
+        // ============================================================
+        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyjO59iBVzOmn4ph5KbN6ArP6eBlEkrGLNkecDobsRInS8qx0WMNsAdh7X3X5QlYXoF/exec";
+
+        // ============================================================
         // 🔐 مفاتيح التشفير
         // ============================================================
         const _k1 = "TjBydGhDQGlyMCMyMDI2";
@@ -673,9 +619,6 @@
             };
         }
 
-        // ============================================================
-        // دالة التشفير
-        // ============================================================
         function generateSecureCode(data) {
             const keys = getKeys();
             const text = data.join('|');
@@ -701,9 +644,6 @@
             return code + '.' + hmacStr;
         }
 
-        // ============================================================
-        // جلب موديل الجهاز
-        // ============================================================
         async function getDeviceModel() {
             try {
                 if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
@@ -748,9 +688,6 @@
             }
         }
 
-        // ============================================================
-        // إدارة اسم المستخدم
-        // ============================================================
         let currentUserName = localStorage.getItem('userName') || '';
 
         function loadUserName() {
@@ -779,9 +716,6 @@
             document.getElementById('nameModal').style.display = 'none';
         }
 
-        // ============================================================
-        // تغيير الصورة
-        // ============================================================
         function changePhoto() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -808,9 +742,6 @@
             }
         }
 
-        // ============================================================
-        // إدارة الموقع والفروع
-        // ============================================================
         let currentLat = null;
         let currentLng = null;
         let locationReady = false;
@@ -955,22 +886,16 @@
             );
         }
 
-        // ============================================================
-        // جلب الوقت الحقيقي من الإنترنت
-        // ============================================================
         async function getRealTime() {
             const sources = [
-                { name: 'WorldTimeAPI', url: 'https://worldtimeapi.org/api/timezone/Africa/Cairo', parser: (data) => new Date(data
-                        .datetime) },
-                { name: 'TimeAPI', url: 'https://timeapi.io/api/Time/current/zone?timeZone=Africa/Cairo', parser: (data) =>
-                        new Date(data.dateTime) },
+                { name: 'WorldTimeAPI', url: 'https://worldtimeapi.org/api/timezone/Africa/Cairo', parser: (data) => new Date(data.datetime) },
+                { name: 'TimeAPI', url: 'https://timeapi.io/api/Time/current/zone?timeZone=Africa/Cairo', parser: (data) => new Date(data.dateTime) },
                 { name: 'Google Time', url: 'https://www.google.com/', parser: (data) => new Date() }
             ];
 
             const promises = sources.map(async(source) => {
                 try {
-                    const response = await fetch(source.url, { method: 'GET', cache: 'no-cache', headers: { 'Accept':
-                                'application/json' } });
+                    const response = await fetch(source.url, { method: 'GET', cache: 'no-cache', headers: { 'Accept': 'application/json' } });
                     if (!response.ok) throw new Error('فشل الاتصال');
                     const data = await response.json();
                     const time = source.parser(data);
@@ -987,22 +912,21 @@
             if (successful.length === 0) {
                 throw new Error('تعذر التحقق من الوقت من الإنترنت.');
             }
-            if (successful.length === 1) {
-                return successful[0].time;
-            }
-            const firstTime = successful[0].time.getTime();
-            const allMatch = successful.every(r => {
-                const diff = Math.abs(r.time.getTime() - firstTime);
-                return diff < 5000;
-            });
-            return allMatch ? successful[0].time : successful[0].time;
+            return successful[0].time;
         }
 
-        // ============================================================
-        // إرسال البيانات مع تشفير
-        // ============================================================
+        function formatDateISO(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+
         const MANAGER_PHONE = "201025828501";
 
+        // ============================================================
+        // ✅ دالة إرسال الحضور / الانصراف
+        // ============================================================
         async function sendAttendance(type) {
             if (!isInBranch) {
                 document.getElementById('statusMessage').innerHTML = `❌ لا يسمح بتسجيل ${type}`;
@@ -1018,16 +942,56 @@
                 return;
             }
 
+            const attendBtn = document.getElementById('attendBtn');
+            const leaveBtn = document.getElementById('leaveBtn');
+            attendBtn.disabled = true;
+            leaveBtn.disabled = true;
+
             document.getElementById('statusMessage').innerHTML = '⏳ جاري التحقق من الوقت...';
 
             try {
                 const now = await getRealTime();
                 const time = now.toLocaleTimeString('ar-EG');
                 const date = now.toLocaleDateString('ar-EG');
+                const dateISO = formatDateISO(now);
 
                 document.getElementById('statusMessage').innerHTML = '📱 جاري جلب معلومات الجهاز...';
                 const deviceModel = await getDeviceModel();
 
+                // ============ 1) إرسال للشيت ============
+                document.getElementById('statusMessage').innerHTML = '🌐 جاري التسجيل في Google Sheet...';
+
+                const actionType = type === 'حضور' ? 'checkin' : 'checkout';
+
+                try {
+                    const response = await fetch(SHEET_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: actionType,
+                            name: currentUserName,
+                            location: branchName,
+                            date: dateISO,
+                            time: time,
+                            device: deviceModel
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('📥 رد الشيت:', result);
+                    
+                    if (result.status === 'error') {
+                        document.getElementById('statusMessage').innerHTML = '❌ ' + result.message;
+                        attendBtn.disabled = false;
+                        leaveBtn.disabled = false;
+                        return;
+                    }
+                } catch (sheetError) {
+                    console.warn('فشل الإرسال للشيت:', sheetError);
+                    document.getElementById('statusMessage').innerHTML = '⚠️ تعذر الاتصال بالشيت، سيتم الإرسال للواتساب فقط';
+                }
+
+                // ============ 2) إرسال للواتساب ============
                 const codeData = [currentUserName, date, time, branchName, type, deviceModel];
                 const secureCode = generateSecureCode(codeData);
 
@@ -1060,13 +1024,15 @@
 
             } catch (error) {
                 document.getElementById('statusMessage').innerHTML = `❌ ${error.message}`;
+            } finally {
+                attendBtn.disabled = false;
+                leaveBtn.disabled = false;
             }
         }
 
         // ============================================================
-        // 🔥 زر الإبلاغ - نافذة منبثقة
+        // 🔥 زر الإبلاغ
         // ============================================================
-
         document.getElementById('btn-main-report').addEventListener('click', openReportModal);
 
         function openReportModal() {
@@ -1075,12 +1041,6 @@
             const overlay = document.createElement('div');
             overlay.id = 'report-modal-overlay';
             overlay.className = 'report-modal-overlay';
-
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    // لا تغلق النافذة
-                }
-            });
 
             overlay.innerHTML = `
             <div class="report-modal">
@@ -1165,15 +1125,22 @@
             };
             bottomCloseBtn.addEventListener('click', closeModal);
 
-            submitBtn.addEventListener('click', function() {
+            submitBtn.addEventListener('click', async function() {
                 const selectedType = reportTypeSelect.value;
                 if (!selectedType) {
                     alert('يرجى اختيار نوع الإبلاغ أولاً');
                     return;
                 }
 
+                if (!currentUserName) {
+                    alert('سجل اسمك أولاً');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+
                 let messageText = `📢 *إبلاغ جديد*\n`;
-                messageText += `👤 الموظف: ${currentUserName || 'غير مسجل'}\n`;
+                messageText += `👤 الموظف: ${currentUserName}\n`;
                 
                 let typeName = selectedType;
                 if (selectedType === 'مأمورية مصلحية') {
@@ -1181,17 +1148,27 @@
                 }
                 messageText += `📌 نوع الإبلاغ: ${typeName}`;
 
+                const deviceModel = await getDeviceModel();
+                let sheetData = {
+                    name: currentUserName,
+                    device: deviceModel
+                };
+
+                let fromDate = '', toDate = '', location = '';
+
                 if (selectedType === 'مأمورية مصلحية') {
-                    const fromDate = overlay.querySelector('#date-from').value;
-                    const toDate = overlay.querySelector('#date-to').value;
-                    const location = overlay.querySelector('#mission-location').value.trim();
+                    fromDate = overlay.querySelector('#date-from').value;
+                    toDate = overlay.querySelector('#date-to').value;
+                    location = overlay.querySelector('#mission-location').value.trim();
 
                     if (!fromDate || !toDate) {
                         alert('يرجى تحديد تاريخ البداية والنهاية للمأمورية');
+                        submitBtn.disabled = false;
                         return;
                     }
                     if (!location) {
                         alert('يرجى كتابة مكان المأمورية');
+                        submitBtn.disabled = false;
                         return;
                     }
 
@@ -1202,11 +1179,17 @@
                         messageText += `\n📅 إلى تاريخ: ${toDate}`;
                     }
                     messageText += `\n📍 المكان: ${location}`;
+
+                    sheetData.action = 'mission';
+                    sheetData.fromDate = fromDate;
+                    sheetData.toDate = toDate;
+                    sheetData.location = location;
                 } else if (selectedType === 'راحة سهر العبور') {
-                    const fromDate = overlay.querySelector('#date-from').value;
-                    const toDate = overlay.querySelector('#date-to').value;
+                    fromDate = overlay.querySelector('#date-from').value;
+                    toDate = overlay.querySelector('#date-to').value;
                     if (!fromDate || !toDate) {
                         alert('يرجى تحديد تاريخ البداية والنهاية لراحة سهر العبور');
+                        submitBtn.disabled = false;
                         return;
                     }
                     if (fromDate === toDate) {
@@ -1215,11 +1198,16 @@
                         messageText += `\n📅 من تاريخ: ${fromDate}`;
                         messageText += `\n📅 إلى تاريخ: ${toDate}`;
                     }
+
+                    sheetData.action = 'rest';
+                    sheetData.fromDate = fromDate;
+                    sheetData.toDate = toDate;
                 } else if (selectedType === 'إجازة') {
-                    const fromDate = overlay.querySelector('#date-from').value;
-                    const toDate = overlay.querySelector('#date-to').value;
+                    fromDate = overlay.querySelector('#date-from').value;
+                    toDate = overlay.querySelector('#date-to').value;
                     if (!fromDate || !toDate) {
                         alert('يرجى تحديد تاريخ البداية والنهاية للإجازة');
+                        submitBtn.disabled = false;
                         return;
                     }
                     if (fromDate === toDate) {
@@ -1228,15 +1216,56 @@
                         messageText += `\n📅 من تاريخ: ${fromDate}`;
                         messageText += `\n📅 إلى تاريخ: ${toDate}`;
                     }
+
+                    sheetData.action = 'vacation';
+                    sheetData.fromDate = fromDate;
+                    sheetData.toDate = toDate;
                 } else if (selectedType === 'إذن صباحي' || selectedType === 'إذن مسائي') {
                     const singleDate = overlay.querySelector('#single-date').value;
                     if (!singleDate) {
                         alert('يرجى تحديد تاريخ الإذن');
+                        submitBtn.disabled = false;
                         return;
                     }
                     messageText += `\n📅 التاريخ: ${singleDate}`;
+
+                    try {
+                        const nowTime = await getRealTime();
+                        sheetData.time = nowTime.toLocaleTimeString('ar-EG');
+                        sheetData.date = singleDate;
+                    } catch(e) {
+                        sheetData.time = '';
+                        sheetData.date = singleDate;
+                    }
+
+                    if (selectedType === 'إذن صباحي') {
+                        sheetData.action = 'morning_permit';
+                    } else {
+                        sheetData.action = 'evening_permit';
+                    }
                 }
 
+                // إرسال للشيت
+                try {
+                    const response = await fetch(SHEET_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(sheetData)
+                    });
+                    
+                    const result = await response.json();
+                    console.log('📥 رد الشيت (إبلاغ):', result);
+                    
+                    if (result.status === 'error') {
+                        alert('❌ ' + result.message);
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                } catch(e) {
+                    console.warn('فشل الإرسال للشيت:', e);
+                }
+
+                // إرسال للواتساب
                 const whatsappUrl = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(messageText)}`;
                 window.open(whatsappUrl, '_blank');
 
@@ -1245,9 +1274,8 @@
         }
 
         // ============================================================
-        // 🗺️ زر الوصول للفرع - نافذة اختيار الفرع (النسخة المُحسّنة)
+        // 🗺️ زر الوصول للفرع
         // ============================================================
-
         document.getElementById('btn-branch-location').addEventListener('click', openBranchModal);
 
         function openBranchModal() {
@@ -1277,7 +1305,6 @@
                         <div class="branch-search">
                             <input type="text" id="branch-search-input" placeholder="🔍 ابحث عن فرع..." class="form-control">
                         </div>
-                        <!-- شيل عداد الفروع -->
                         <div class="branch-list" id="branch-list">
                             ${branchesHTML}
                         </div>
@@ -1290,41 +1317,22 @@
 
             document.body.appendChild(overlay);
 
-            // ==========================================
-            // إغلاق النافذة (فقط من الزر السفلي)
-            // ==========================================
             const closeModal = () => overlay.remove();
             document.getElementById('branch-close-bottom').addEventListener('click', closeModal);
-
-            // إغلاق عند الضغط خارج النافذة
             overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    closeModal();
-                }
+                if (e.target === overlay) closeModal();
             });
 
-            // ==========================================
-            // البحث في الفروع
-            // ==========================================
             const searchInput = document.getElementById('branch-search-input');
-
             searchInput.addEventListener('input', function(e) {
                 const searchTerm = e.target.value.trim().toLowerCase();
                 const items = overlay.querySelectorAll('.branch-item');
-
                 items.forEach(item => {
                     const name = item.dataset.name.toLowerCase();
-                    if (name.includes(searchTerm)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
+                    item.style.display = name.includes(searchTerm) ? 'flex' : 'none';
                 });
             });
 
-            // ==========================================
-            // عند الضغط على أي فرع → فتح الخريطة
-            // ==========================================
             const branchItems = overlay.querySelectorAll('.branch-item');
             branchItems.forEach(item => {
                 item.addEventListener('click', function() {
@@ -1337,17 +1345,11 @@
             });
         }
 
-        // ============================================================
-        // 🗺️ فتح خرائط جوجل
-        // ============================================================
         function openGoogleMaps(lat, lng, name) {
             const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(name)}`;
             window.open(url, '_blank');
         }
 
-        // ============================================================
-        // تشغيل الصفحة
-        // ============================================================
         window.onload = function() {
             loadPhoto();
             loadUserName();
