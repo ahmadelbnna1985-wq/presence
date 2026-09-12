@@ -86,6 +86,7 @@
             position: relative;
             display: inline-block;
             cursor: pointer;
+            user-select: none;
         }
         .profile-name {
             font-size: 19px;
@@ -95,19 +96,6 @@
             border-radius: 10px;
             transition: all 0.3s ease;
             display: inline-block;
-        }
-        .profile-name:hover {
-            background: #e8f4fd;
-        }
-        .edit-icon {
-            font-size: 14px;
-            color: #3498db;
-            margin-right: 4px;
-            opacity: 0.6;
-            transition: all 0.3s ease;
-        }
-        .profile-name:hover .edit-icon {
-            opacity: 1;
         }
         .location-box {
             width: 100%;
@@ -222,7 +210,8 @@
             color: #1a2b4c;
             font-size: 19px;
         }
-        .modal-content input {
+        .modal-content input,
+        .modal-content select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -230,8 +219,11 @@
             font-size: 16px;
             margin-bottom: 14px;
             text-align: center;
+            background: white;
+            font-family: inherit;
         }
-        .modal-content input:focus {
+        .modal-content input:focus,
+        .modal-content select:focus {
             border-color: #3498db;
             outline: none;
         }
@@ -564,9 +556,8 @@
                 <img id="profileImage" class="profile-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e8f4fd'/%3E%3Ctext x='50' y='58' font-size='44' text-anchor='middle' fill='%233498db'%3E👤%3C/text%3E%3C/svg%3E" alt="صورة الموظف">
                 <div class="camera-overlay">📷</div>
             </div>
-            <div class="profile-name-container" onclick="editName()">
-                <span class="profile-name" id="userNameDisplay">غير مسجل</span>
-                <span class="edit-icon">✏️</span>
+            <div class="profile-name-container" id="nameContainer">
+                <span class="profile-name" id="userNameDisplay">اختر اسمك</span>
             </div>
         </div>
 
@@ -588,13 +579,25 @@
         <div class="note">📍 الأزرار تعمل فقط عند تطابق الموقع مع أحد فروع الشركة</div>
     </div>
 
+    <!-- Modal اختيار الاسم -->
     <div class="modal" id="nameModal">
         <div class="modal-content">
-            <h3>✏️ تغيير الاسم</h3>
-            <input type="text" id="nameInput" placeholder="ادخل اسمك الكامل">
+            <h3>👤 اختر اسمك</h3>
+            <select id="nameSelect">
+                <option value="">-- اختر اسمك من القايمة --</option>
+                <option value="أحمد البنا">أحمد البنا</option>
+                <option value="أحمد خيري">أحمد خيري</option>
+                <option value="أحمد سراج">أحمد سراج</option>
+                <option value="سامح سلامة">سامح سلامة</option>
+                <option value="شادي فتحي">شادي فتحي</option>
+                <option value="محمد أمين">محمد أمين</option>
+                <option value="محمد سيد">محمد سيد</option>
+                <option value="محمد عصام">محمد عصام</option>
+                <option value="وليد نصر الدين">وليد نصر الدين</option>
+                <option value="ياسر فوزي">ياسر فوزي</option>
+            </select>
             <div class="modal-buttons">
                 <button class="modal-save" onclick="saveName()">حفظ</button>
-                <button class="modal-cancel" onclick="closeModal()">إلغاء</button>
             </div>
         </div>
     </div>
@@ -605,6 +608,22 @@
         // 🌐 رابط Google Apps Script Web App
         // ============================================================
         const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyjO59iBVzOmn4ph5KbN6ArP6eBlEkrGLNkecDobsRInS8qx0WMNsAdh7X3X5QlYXoF/exec";
+
+        // ============================================================
+        // 📋 قايمة الموظفين
+        // ============================================================
+        const EMPLOYEES = [
+            'أحمد البنا',
+            'أحمد خيري',
+            'أحمد سراج',
+            'سامح سلامة',
+            'شادي فتحي',
+            'محمد أمين',
+            'محمد سيد',
+            'محمد عصام',
+            'وليد نصر الدين',
+            'ياسر فوزي'
+        ];
 
         // ============================================================
         // 🔐 مفاتيح التشفير
@@ -690,30 +709,41 @@
 
         let currentUserName = localStorage.getItem('userName') || '';
 
+        // ============================================================
+        // ✅ تحميل الاسم + التحقق من القايمة
+        // ============================================================
         function loadUserName() {
-            if (currentUserName) {
+            // ✅ نتأكد إن الاسم متخزن + موجود في القايمة الجديدة
+            if (currentUserName && EMPLOYEES.indexOf(currentUserName) !== -1) {
+                // الاسم موجود في القايمة → نعرضه
                 document.getElementById('userNameDisplay').textContent = currentUserName;
+            } else {
+                // الاسم مش موجود (قديم) أو مفيش اسم → نطلب اختيار جديد
+                if (currentUserName) {
+                    console.log('🗑️ اسم قديم مش من القايمة، هيتم مسحه:', currentUserName);
+                    localStorage.removeItem('userName');
+                    currentUserName = '';
+                }
+                document.getElementById('userNameDisplay').textContent = 'اختر اسمك';
+                // نفتح نافذة اختيار الاسم فوراً
+                document.getElementById('nameModal').style.display = 'flex';
             }
-        }
-
-        function editName() {
-            document.getElementById('nameInput').value = currentUserName || '';
-            document.getElementById('nameModal').style.display = 'flex';
         }
 
         function saveName() {
-            let name = document.getElementById('nameInput').value.trim();
-            if (name !== '') {
-                currentUserName = name;
-                localStorage.setItem('userName', currentUserName);
-                document.getElementById('userNameDisplay').textContent = currentUserName;
-                document.getElementById('statusMessage').innerHTML = '✅ تم تحديث الاسم';
+            const select = document.getElementById('nameSelect');
+            const name = select.value;
+            
+            if (!name) {
+                alert('اختر اسمك من القايمة');
+                return;
             }
-            closeModal();
-        }
-
-        function closeModal() {
+            
+            currentUserName = name;
+            localStorage.setItem('userName', name);
+            document.getElementById('userNameDisplay').textContent = name;
             document.getElementById('nameModal').style.display = 'none';
+            document.getElementById('statusMessage').innerHTML = '✅ تم حفظ اسمك: ' + name;
         }
 
         function changePhoto() {
@@ -740,6 +770,34 @@
             if (savedPhoto) {
                 document.getElementById('profileImage').src = savedPhoto;
             }
+        }
+
+        // ✅ دوسة طويلة على الاسم = إعادة تعيين
+        function setupLongPressReset() {
+            const nameContainer = document.getElementById('nameContainer');
+            let pressTimer;
+            
+            const startPress = function() {
+                pressTimer = setTimeout(function() {
+                    if (confirm('⚠️ هل تريد إعادة تعيين اسمك؟\n\nهتحتاج تختار اسمك من القايمة تاني.')) {
+                        localStorage.removeItem('userName');
+                        currentUserName = '';
+                        document.getElementById('userNameDisplay').textContent = 'اختر اسمك';
+                        document.getElementById('nameModal').style.display = 'flex';
+                    }
+                }, 1500); // 1.5 ثانية
+            };
+            
+            const cancelPress = function() {
+                clearTimeout(pressTimer);
+            };
+            
+            nameContainer.addEventListener('mousedown', startPress);
+            nameContainer.addEventListener('mouseup', cancelPress);
+            nameContainer.addEventListener('mouseleave', cancelPress);
+            nameContainer.addEventListener('touchstart', startPress);
+            nameContainer.addEventListener('touchend', cancelPress);
+            nameContainer.addEventListener('touchcancel', cancelPress);
         }
 
         let currentLat = null;
@@ -886,11 +944,7 @@
             );
         }
 
-        // ============================================================
-        // ⚡ نسخة سريعة من getRealTime (مصدر واحد + fallback)
-        // ============================================================
         async function getRealTime() {
-            // محاولة واحدة بمهلة 3 ثواني
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -913,7 +967,6 @@
                 console.warn('فشل جلب الوقت من الإنترنت، سيتم استخدام وقت الجهاز');
             }
 
-            // fallback: وقت الجهاز
             return new Date();
         }
 
@@ -927,7 +980,7 @@
         const MANAGER_PHONE = "201025828501";
 
         // ============================================================
-        // ✅ دالة إرسال الحضور / الانصراف (سريعة)
+        // ✅ دالة إرسال الحضور / الانصراف
         // ============================================================
         async function sendAttendance(type) {
             if (!isInBranch) {
@@ -935,13 +988,25 @@
                 return;
             }
             if (!currentUserName) {
-                document.getElementById('statusMessage').innerHTML = '⚠️ سجل اسمك أولاً';
+                document.getElementById('statusMessage').innerHTML = '⚠️ اختر اسمك أولاً';
+                document.getElementById('nameModal').style.display = 'flex';
                 return;
             }
             if (!locationReady) {
                 document.getElementById('statusMessage').innerHTML = '⚠️ انتظر تحميل الموقع';
                 getLocation();
                 return;
+            }
+
+            // ✅ التحقق من الإذن الصباحي (لو بيسجل حضور)
+            if (type === 'حضور') {
+                const morningPermitDate = localStorage.getItem('morningPermitDate');
+                const today = formatDateISO(new Date());
+                
+                if (morningPermitDate === today) {
+                    document.getElementById('statusMessage').innerHTML = '⛔ عندك إذن صباحي النهاردة، مينفعش تسجل حضور';
+                    return;
+                }
             }
 
             const attendBtn = document.getElementById('attendBtn');
@@ -960,7 +1025,6 @@
                 document.getElementById('statusMessage').innerHTML = '📱 جاري جلب معلومات الجهاز...';
                 const deviceModel = await getDeviceModel();
 
-                // ============ تجهيز البيانات ============
                 const actionType = type === 'حضور' ? 'checkin' : 'checkout';
 
                 const codeData = [currentUserName, date, time, branchName, type, deviceModel];
@@ -988,11 +1052,11 @@
                 message += `📱 الجهاز: ${deviceModel}\n`;
                 message += `🔐 الكود:\n${secureCode}`;
 
-                // ============ 1) فتح واتساب فوراً ============
+                // 1) فتح واتساب فوراً
                 let url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(message)}`;
                 window.open(url, '_blank');
 
-                // ============ 2) إرسال للشيت في الخلفية (بدون انتظار) ============
+                // 2) إرسال للشيت في الخلفية
                 fetch(SHEET_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1008,7 +1072,6 @@
                   .then(result => console.log('📥 رد الشيت:', result))
                   .catch(err => console.warn('⚠️ فشل الإرسال للشيت:', err));
 
-                // ============ 3) رسالة بسيطة ============
                 document.getElementById('statusMessage').innerHTML = '✅ تم — ابعت الرسالة في واتساب';
 
             } catch (error) {
@@ -1020,7 +1083,7 @@
         }
 
         // ============================================================
-        // 🔥 زر الإبلاغ (نفس المنطق السريع)
+        // 🔥 زر الإبلاغ
         // ============================================================
         document.getElementById('btn-main-report').addEventListener('click', openReportModal);
 
@@ -1046,6 +1109,9 @@
                     <option value="إذن صباحي">إذن صباحي</option>
                     <option value="إذن مسائي">إذن مسائي</option>
                     <option value="إجازة">إجازة</option>
+                    <option value="مستشفى الكهرباء">مستشفى الكهرباء</option>
+                    <option value="عيادات روكسي">عيادات روكسي</option>
+                    <option value="عيادات العباسية">عيادات العباسية</option>
                   </select>
                 </div>
 
@@ -1106,6 +1172,8 @@
                     rangeDateField.classList.remove('hidden');
                 } else if (value === 'إذن صباحي' || value === 'إذن مسائي') {
                     singleDateField.classList.remove('hidden');
+                } else if (value === 'مستشفى الكهرباء' || value === 'عيادات روكسي' || value === 'عيادات العباسية') {
+                    singleDateField.classList.remove('hidden');
                 }
             });
 
@@ -1122,7 +1190,7 @@
                 }
 
                 if (!currentUserName) {
-                    alert('سجل اسمك أولاً');
+                    alert('اختر اسمك أولاً');
                     return;
                 }
 
@@ -1227,10 +1295,32 @@
                         sheetData.date = singleDate;
                     }
 
+                    // ✅ لو إذن صباحي → نخزنه في localStorage
                     if (selectedType === 'إذن صباحي') {
                         sheetData.action = 'morning_permit';
+                        localStorage.setItem('morningPermitDate', singleDate);
+                        console.log('✅ تم حفظ إذن صباحي بتاريخ:', singleDate);
                     } else {
                         sheetData.action = 'evening_permit';
+                    }
+                } else if (selectedType === 'مستشفى الكهرباء' || selectedType === 'عيادات روكسي' || selectedType === 'عيادات العباسية') {
+                    const singleDate = overlay.querySelector('#single-date').value;
+                    if (!singleDate) {
+                        alert('يرجى تحديد التاريخ');
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    messageText += `\n📅 التاريخ: ${singleDate}`;
+
+                    sheetData.date = singleDate;
+                    sheetData.time = '';
+
+                    if (selectedType === 'مستشفى الكهرباء') {
+                        sheetData.action = 'hospital';
+                    } else if (selectedType === 'عيادات روكسي') {
+                        sheetData.action = 'roxy_clinic';
+                    } else {
+                        sheetData.action = 'abbasia_clinic';
                     }
                 }
 
@@ -1238,7 +1328,7 @@
                 const whatsappUrl = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(messageText)}`;
                 window.open(whatsappUrl, '_blank');
 
-                // 2) إرسال للشيت في الخلفية (بدون انتظار)
+                // 2) إرسال للشيت في الخلفية
                 fetch(SHEET_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1331,6 +1421,7 @@
         window.onload = function() {
             loadPhoto();
             loadUserName();
+            setupLongPressReset();
             getLocation();
         };
     </script>
