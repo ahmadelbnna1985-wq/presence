@@ -886,33 +886,35 @@
             );
         }
 
+        // ============================================================
+        // ⚡ نسخة سريعة من getRealTime (مصدر واحد + fallback)
+        // ============================================================
         async function getRealTime() {
-            const sources = [
-                { name: 'WorldTimeAPI', url: 'https://worldtimeapi.org/api/timezone/Africa/Cairo', parser: (data) => new Date(data.datetime) },
-                { name: 'TimeAPI', url: 'https://timeapi.io/api/Time/current/zone?timeZone=Africa/Cairo', parser: (data) => new Date(data.dateTime) },
-                { name: 'Google Time', url: 'https://www.google.com/', parser: (data) => new Date() }
-            ];
+            // محاولة واحدة بمهلة 3 ثواني
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-            const promises = sources.map(async(source) => {
-                try {
-                    const response = await fetch(source.url, { method: 'GET', cache: 'no-cache', headers: { 'Accept': 'application/json' } });
-                    if (!response.ok) throw new Error('فشل الاتصال');
+                const response = await fetch('https://worldtimeapi.org/api/timezone/Africa/Cairo', {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
                     const data = await response.json();
-                    const time = source.parser(data);
-                    if (isNaN(time.getTime())) throw new Error('وقت غير صالح');
-                    return { source: source.name, time: time, success: true };
-                } catch (error) {
-                    return { source: source.name, time: null, success: false };
+                    const time = new Date(data.datetime);
+                    if (!isNaN(time.getTime())) {
+                        return time;
+                    }
                 }
-            });
-
-            const results = await Promise.all(promises);
-            const successful = results.filter(r => r.success);
-
-            if (successful.length === 0) {
-                throw new Error('تعذر التحقق من الوقت من الإنترنت.');
+            } catch (e) {
+                console.warn('فشل جلب الوقت من الإنترنت، سيتم استخدام وقت الجهاز');
             }
-            return successful[0].time;
+
+            // fallback: وقت الجهاز
+            return new Date();
         }
 
         function formatDateISO(date) {
@@ -925,7 +927,7 @@
         const MANAGER_PHONE = "201025828501";
 
         // ============================================================
-        // ✅ دالة إرسال الحضور / الانصراف
+        // ✅ دالة إرسال الحضور / الانصراف (سريعة)
         // ============================================================
         async function sendAttendance(type) {
             if (!isInBranch) {
@@ -958,40 +960,9 @@
                 document.getElementById('statusMessage').innerHTML = '📱 جاري جلب معلومات الجهاز...';
                 const deviceModel = await getDeviceModel();
 
-                // ============ 1) إرسال للشيت ============
-                document.getElementById('statusMessage').innerHTML = '🌐 جاري التسجيل في Google Sheet...';
-
+                // ============ تجهيز البيانات ============
                 const actionType = type === 'حضور' ? 'checkin' : 'checkout';
 
-                try {
-                    const response = await fetch(SHEET_API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: actionType,
-                            name: currentUserName,
-                            location: branchName,
-                            date: dateISO,
-                            time: time,
-                            device: deviceModel
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    console.log('📥 رد الشيت:', result);
-                    
-                    if (result.status === 'error') {
-                        document.getElementById('statusMessage').innerHTML = '❌ ' + result.message;
-                        attendBtn.disabled = false;
-                        leaveBtn.disabled = false;
-                        return;
-                    }
-                } catch (sheetError) {
-                    console.warn('فشل الإرسال للشيت:', sheetError);
-                    document.getElementById('statusMessage').innerHTML = '⚠️ تعذر الاتصال بالشيت، سيتم الإرسال للواتساب فقط';
-                }
-
-                // ============ 2) إرسال للواتساب ============
                 const codeData = [currentUserName, date, time, branchName, type, deviceModel];
                 const secureCode = generateSecureCode(codeData);
 
@@ -1017,10 +988,28 @@
                 message += `📱 الجهاز: ${deviceModel}\n`;
                 message += `🔐 الكود:\n${secureCode}`;
 
+                // ============ 1) فتح واتساب فوراً ============
                 let url = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(message)}`;
                 window.open(url, '_blank');
 
-                document.getElementById('statusMessage').innerHTML = `✅ تم تسجيل ${type} في ${branchName}`;
+                // ============ 2) إرسال للشيت في الخلفية (بدون انتظار) ============
+                fetch(SHEET_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: actionType,
+                        name: currentUserName,
+                        location: branchName,
+                        date: dateISO,
+                        time: time,
+                        device: deviceModel
+                    })
+                }).then(response => response.json())
+                  .then(result => console.log('📥 رد الشيت:', result))
+                  .catch(err => console.warn('⚠️ فشل الإرسال للشيت:', err));
+
+                // ============ 3) رسالة بسيطة ============
+                document.getElementById('statusMessage').innerHTML = '✅ تم — ابعت الرسالة في واتساب';
 
             } catch (error) {
                 document.getElementById('statusMessage').innerHTML = `❌ ${error.message}`;
@@ -1031,7 +1020,7 @@
         }
 
         // ============================================================
-        // 🔥 زر الإبلاغ
+        // 🔥 زر الإبلاغ (نفس المنطق السريع)
         // ============================================================
         document.getElementById('btn-main-report').addEventListener('click', openReportModal);
 
@@ -1245,29 +1234,18 @@
                     }
                 }
 
-                // إرسال للشيت
-                try {
-                    const response = await fetch(SHEET_API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(sheetData)
-                    });
-                    
-                    const result = await response.json();
-                    console.log('📥 رد الشيت (إبلاغ):', result);
-                    
-                    if (result.status === 'error') {
-                        alert('❌ ' + result.message);
-                        submitBtn.disabled = false;
-                        return;
-                    }
-                } catch(e) {
-                    console.warn('فشل الإرسال للشيت:', e);
-                }
-
-                // إرسال للواتساب
+                // 1) فتح واتساب فوراً
                 const whatsappUrl = `https://wa.me/${MANAGER_PHONE}?text=${encodeURIComponent(messageText)}`;
                 window.open(whatsappUrl, '_blank');
+
+                // 2) إرسال للشيت في الخلفية (بدون انتظار)
+                fetch(SHEET_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(sheetData)
+                }).then(response => response.json())
+                  .then(result => console.log('📥 رد الشيت (إبلاغ):', result))
+                  .catch(err => console.warn('⚠️ فشل الإرسال للشيت:', err));
 
                 closeModal();
             });
